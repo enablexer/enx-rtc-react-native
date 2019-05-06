@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>logFormatVersion</key>
+	<integer>9</integer>
+	<key>logs</key>
+	<dict>
+		<key>79099292-4B4E-4E26-A80F-31D00846C932</key>
+		<dict>
+			<key>className</key>
+			<string>IDECommandLineBuildLog</string>
+			<key>documentTypeString</key>
+			<string>&lt;nil&gt;</string>
+			<key>domainType</key>
+			<string>Xcode.IDEActivityLogDomainType.BuildLog</string>
+			<key>fileName</key>
+			<string>79099292-4B4E-4E26-A80F-31D00846C932.xcactivitylog</string>
+			<key>highLevelStatus</key>
+			<string>E</string>
+			<key>schemeIdentifier-containerName</key>
+			<string>Enx project</string>
+			<key>schemeIdentifier-schemeName</key>
+			<string>Enx</string>
+			<key>schemeIdentifier-sharedScheme</key>
+			<integer>1</integer>
+			<key>signature</key>
+			<string>Building project Enx with scheme Enx and configuration Debug</string>
+			<key>timeStartedRecording</key>
+			<real>577794649.74079502</real>
+			<key>timeStoppedRecording</key>
+			<real>577794651.867401</real>
+			<key>title</key>
+			<string>Building project Enx with scheme Enx and configuration Debug</string>
+			<key>uniqueIdentifier</key>
+			<string>79099292-4B4E-4E26-A80F-31D00846C932</string>
+		</dict>
+	</dict>
+</dict>
+</plist>
