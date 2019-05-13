@@ -178,13 +178,22 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
         }
     }
 
-//    @ReactMethod
-//    public void getDevices( Callback callback) {
-//        if (mEnxRoom != null) {
-//            callback.invoke( mEnxRoom.getDevices());
-//        }
-//    }
-
+    @ReactMethod
+    public void getDevices(Callback callback) {
+        if (mEnxRoom != null) {
+            ArrayList<String> deviceList = (ArrayList<String>) mEnxRoom.getDevices();
+            WritableArray array = Arguments.createArray();
+            for (int i = 0; i < deviceList.size(); i++) {
+                Object value = deviceList.get(i).trim();
+                if (value instanceof String) {
+                    array.pushString(deviceList.get(i));
+                } else if (value == null) {
+                    array.pushNull();
+                }
+            }
+            callback.invoke(array);
+        }
+    }
     @ReactMethod
     public void getSelectedDevice(Callback callback) {
         if (mEnxRoom != null) {

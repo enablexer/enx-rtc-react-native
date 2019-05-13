@@ -3,7 +3,7 @@ import { View, ViewPropTypes } from 'react-native';
 import PropTypes from 'prop-types';
 import { setNativeEvents, removeNativeEvents,  Enx } from './Enx';
 import { sanitizeRoomEvents,sanitizeLocalInfoData} from './helpers/EnxRoomHelper';
-import { pick, isNull } from 'underscore';
+import { pick } from 'underscore';
 
 export default class EnxRoom extends Component {
   constructor(props) {
@@ -11,25 +11,18 @@ export default class EnxRoom extends Component {
   }
   componentWillMount() {
     try {
-    console.log("EnxRoom.js","componentWillMount");
     const token = pick(this.props, ['token']);
-    console.log("EnxRoom.js",this.props.eventHandlers);
-    console.log("EnxRoom.js",this.props.localInfo);
     const roomEvents = sanitizeRoomEvents(this.props.eventHandlers);
     setNativeEvents(roomEvents);
     
 const info=sanitizeLocalInfoData(this.props.localInfo);
-    Enx.joinRoom(token.token,info)
-    // Enx.connect(token.token);
-    //  this.createRoom(token);  
+    Enx.joinRoom(token.token,info) 
     } catch (error) {
        console.log("EnxRoom.js componentWillMount",error);
     } 
   }
 
-   componentDidUpdate(previousProps) {
-     console.log("componentDidUpdate");
-     
+   componentDidUpdate(previousProps) {     
     const useDefault = (value, defaultValue) => (value === undefined ? defaultValue : value);
     const shouldUpdate = (key, defaultValue) => {
       const previous = useDefault(previousProps[key], defaultValue);
@@ -40,7 +33,6 @@ const info=sanitizeLocalInfoData(this.props.localInfo);
     const updateRoomProperty = (key, defaultValue) => {
       if (shouldUpdate(key, defaultValue)) {
         const value = useDefault(this.props[key], defaultValue);
-        console.log("updateRoomProperty");
       }
     };
 

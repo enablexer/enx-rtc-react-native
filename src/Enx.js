@@ -6,10 +6,7 @@ const nativeEvents = new NativeEventEmitter(Enx);
 
 const setNativeEvents = (events) => {
   const eventNames = Object.keys(events);
-  Enx.setNativeEvents(eventNames);
-  Enx.enableLogs(true)
-  console.log("EnxEventName",eventNames);
-  
+  Enx.setNativeEvents(eventNames); 
   each(events, (eventHandler, eventType) => {
     const allEvents = nativeEvents.listeners();
     if (!allEvents.includes(eventType)) {

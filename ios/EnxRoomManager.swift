@@ -428,12 +428,15 @@ extension EnxRoomManager : EnxRoomDelegate, EnxStreamDelegate,EnxRoomStatsDelega
         guard let errorVal = reason else{
             return
         }
-        self.emitEvent(event: "room:didEventError", data: errorVal)
+        self.emitEvent(event: "room:didError", data: errorVal)
     }
 
     func room(_ room: EnxRoom?, didEventError reason: [Any]?) {
         print(reason as Any);
-        self.emitEvent(event: "room:didError", data: reason as Any)
+        guard let resDict = reason?[0] as? [String : Any], reason!.count > 0 else{
+            return
+        }
+        self.emitEvent(event: "room:didEventError", data:resDict)
     }
 
     func room(_ room: EnxRoom?, didPublishStream stream: EnxStream?) {
@@ -760,7 +763,7 @@ extension EnxRoomManager : EnxRoomDelegate, EnxStreamDelegate,EnxRoomStatsDelega
         self.emitEvent(event: "stream:didRemoteStreamVideoMute", data: dataDict)
     }
     
-    //Receive all other users
+    // Receive all other users
     func stream(_ stream: EnxStream?, didSelfUnmuteVideo data: [Any]?) {
         guard let dataDict = data?[0] as? [String : Any], data!.count>0 else {
             return

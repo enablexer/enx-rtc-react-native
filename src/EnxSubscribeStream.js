@@ -2,8 +2,7 @@ import React, { Component } from 'react';
 import { View, Platform } from 'react-native';
 import PropTypes from 'prop-types';
 import EnxPlayerView from './views/EnxPlayerView';
-import { Enx, nativeEvents,setNativeEvents,removeNativeEvents } from './Enx';
-import { isNull, isUndefined, each, isEqual, isEmpty } from 'underscore';
+import { Enx, nativeEvents } from './Enx';
 
 export default class EnxSubscribeStream extends Component {
   constructor(props) {
@@ -21,9 +20,7 @@ export default class EnxSubscribeStream extends Component {
   }
   componentWillMount() {
     console.log("EnxSubscribeStream.js","componentWillMount");
-    console.log("componenetArrayValues: ",this.componentEventsArray)
     this.streamCreated = nativeEvents.addListener(this.componentEvents.streamCreated, stream => this.streamCreatedHandler(stream));
-
     this.activeTalkerstreamCreated = nativeEvents.addListener(this.componentEvents.activeTalkerstreamCreated, activeTalkerStream => this.activeTalkerstreamCreatedHandler(activeTalkerStream));
     Enx.setJSComponentEvents(this.componentEventsArray);
   }
@@ -33,17 +30,13 @@ export default class EnxSubscribeStream extends Component {
   }
 
   streamCreatedHandler = (stream) => {
-    console.log("EnxSubscribeStream.js",stream);
     this.state.streams = [...this.state.streams, stream.streamId]
     }
 
 activeTalkerstreamCreatedHandler = (activeTalkerStream) => {
-        console.log("activeTalkerstreamCreatedHandler.js", activeTalkerStream);
         var tempArray = []
         this.state.activeTalkerStreams = []
         tempArray = activeTalkerStream
-        console.log("activeTalkerstreamArrayTemp: ", tempArray);
-
         if(tempArray.length == 0){
           this.setState({
             activeTalkerStreams: tempArray,
@@ -52,11 +45,7 @@ activeTalkerstreamCreatedHandler = (activeTalkerStream) => {
 
         for (let i = 0; i < tempArray.length; i++)  
       {
-        //inner loop to create columns
-        console.log("In loop")
         const temp = tempArray[i]
-        console.log("streamsssIdTemp: ",temp)
-        console.log("streamsssId: ",String(temp.streamId))
         this.setState({
           activeTalkerStreams: [...this.state.activeTalkerStreams, String(temp.streamId)],
         });
@@ -64,15 +53,7 @@ activeTalkerstreamCreatedHandler = (activeTalkerStream) => {
          
 } 
       
-//  Enx.subscribeToStream(stream.streamId, (error) => {
-//         this.setState({
-//           streams: [...this.state.streams, stream.streamId],
-//         });      
-    // });
-  
- 
   render() {
-    console.log("rrrrrrrrr: ",this.state.activeTalkerStreams)
     const childrenWithStreams = this.state.activeTalkerStreams.map((streamId) => {
       return <EnxPlayerView  key={streamId} streamId={streamId} {...this.props}/>
     });

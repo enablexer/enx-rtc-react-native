@@ -3,14 +3,13 @@ import PropTypes from 'prop-types';
 import { View, Platform } from 'react-native';
 import { Enx, removeNativeEvents, nativeEvents, setNativeEvents } from './Enx';
 import EnxPlayerView from './views/EnxPlayerView';
-import {sanitizePlayerViewEvents} from './helpers/EnxPlayerViewHelper';
+import {sanitizePlayerViewEvents} from './helpers/EnxStreamHelper';
 
 import { isNull } from 'underscore';
 const uuid = require('uuid/v4');
 
 class EnxStream extends Component {
   constructor(props) {
-    console.log("constructttt");
     super(props);
         this.state = {
       streamId:uuid(),

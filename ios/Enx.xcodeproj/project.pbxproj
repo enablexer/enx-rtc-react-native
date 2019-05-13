@@ -247,14 +247,11 @@
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/../example/ios/Pods/**",
 					"$(inherited)",
+					"$(PROJECT_DIR)/../../../ios/Pods/**",
 				);
 				GCC_NO_COMMON_BLOCKS = YES;
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/../../node_modules/react-native/React/**",
-				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "";
 				OTHER_LDFLAGS = (
@@ -274,14 +271,11 @@
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/../example/ios/Pods/**",
 					"$(inherited)",
+					"$(PROJECT_DIR)/../../../ios/Pods/**",
 				);
 				GCC_NO_COMMON_BLOCKS = YES;
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/../../node_modules/react-native/React/**",
-				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "";
 				OTHER_LDFLAGS = (

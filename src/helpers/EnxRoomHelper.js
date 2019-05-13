@@ -1,5 +1,5 @@
 import { reassignEvents } from './EnxHelper';
-import { each, isNull, isEmpty, isString,isBoolean } from 'underscore';
+import { isString,isBoolean } from 'underscore';
 
 const sanitizeRoomEvents = (events) => {
   try {    
@@ -9,40 +9,38 @@ const sanitizeRoomEvents = (events) => {
 
   const customEvents = {
      ios: {
-      roomConnected : 'didRoomConnected',
-      roomError : 'didError',
-      eventError :'didEventError',
-      roomDisconnected: 'didDisconnected',
-      streamPublished : 'didPublishedStream',
-      streamAdded :'didStreamAdded',
-      streamSubscribed : 'didSubscribedStream',
-      activeTalkerList : 'didActiveTalkerList',
-      recordStarted: 'didRoomRecordStart',
-      recordStopped: 'didRoomRecordStop',
-      startRecordingEvent: 'didStartRecordingEvent',
-      stopRecordingEvent: 'didStopRecordingEvent',
-      screenShareStarted: 'didScreenSharedStarted',
-      sceenShareStopped: 'didScreenShareStopped',
-      canvasStarted: 'didCanvasStarted',
-      canvasStopped: 'didCanvasStopped',
-      floorRequested: 'didFloorRequested',
-      processFloorRequeted: 'didProcessFloorRequested',
-      floorRequestReceived: 'didFloorRequestReceived',
-      grantFloorRequested: 'didGrantFloorRequested',
-      denyFloorRequested: 'didDenyFloorRequested',
-      releaseFloorRequested: 'didReleaseFloorRequested',
-      mutedAllUser: 'didMutedAllUser',
-      unmutedAllUser: 'didUnMutedAllUser',
-      hardMutedAll: 'didHardMutedAll',
-      hardUnmuteAllUser: 'didHardUnMuteAllUser',
-      userJoined: 'userDidJoined',
-      userDisconnected: 'userDidDisconnected',
-      logUpload: 'didLogUpload',
-      publishStats: 'publishStats',
-      subscribeStats: 'subscribeStats',
-      setTalkerCount: 'didSetTalkerCount',
-      getMaxTalkers: 'didGetMaxTalkers',
-      getTalkerCount: 'didGetTalkerCount'
+      roomConnected : 'didRoomConnected', /* Event called on success of room connection. */
+      roomError : 'didError', /* Event called on error while room connection. */
+      eventError :'didEventError', /* Event called on any event error. */
+      roomDisconnected: 'didDisconnected', /* Event called on any event error. */
+      streamPublished : 'didPublishedStream', /* Event called on publish stream success. */
+      streamAdded :'didStreamAdded', /* Event called on stream added in the room. */
+      streamSubscribed : 'didSubscribedStream', /* Event called on subscribe stream success. */
+      activeTalkerList : 'didActiveTalkerList', /* Event called to get updated active talker list. */
+      recordStarted: 'didRoomRecordStart', /* Event when recording is started in the room, (either implicitly or explicitly), all connected users are notified that room is being recorded.. */
+      recordStopped: 'didRoomRecordStop', /* Event when the recording is turned off (either implicitly or explicitly), all connected users are notified that recording has been stopped in the room. */
+      startRecordingEvent: 'didStartRecordingEvent', /* Event called when recording started by the moderator. */
+      stopRecordingEvent: 'didStopRecordingEvent', /* Event called when recording stopped by the moderator. */
+      screenShareStarted: 'didScreenSharedStarted', /* Event called when screen share started. */
+      sceenShareStopped: 'didScreenShareStopped', /* Event called when screen share stopped. */
+      canvasStarted: 'didCanvasStarted', /* Event called when screen canvas stopped. */
+      canvasStopped: 'didCanvasStopped', /* Event called when screen canvas stopped. */
+      floorRequested: 'didFloorRequested', /* Event for participant on the success of requestFloor. This is for participant only. */
+      processFloorRequeted: 'didProcessFloorRequested', /* Event for Moderator on performing actions like grantFloor, denyFloor, releaseFloor. */
+      floorRequestReceived: 'didFloorRequestReceived', /* Event for Moderatoron any Floor Request raised by the participant. This is for Moderator only. */
+      grantFloorRequested: 'didGrantFloorRequested', /* Event for Participant when the moderator performs action grantFloor. */
+      denyFloorRequested: 'didDenyFloorRequested', /* Event for Participant when the moderator performs action denyFloor. */
+      releaseFloorRequested: 'didReleaseFloorRequested', /* Event for Participant when the moderator performs action releaseFloor. */
+      mutedAllUser: 'didMutedAllUser', /* Event for called when the room is muted by the moderator. Available to Moderator only. */
+      unmutedAllUser: 'didUnMutedAllUser', /* Event for called when the room is unmuted by the moderator. Available to Moderator only. */
+      hardMutedAll: 'didHardMutedAll', /* Event for Participants when room is muted by any moderator. */
+      hardUnmuteAllUser: 'didHardUnMuteAllUser', /* Event for Participants when room is unmuted by any moderator. */
+      userJoined: 'userDidJoined', /* Event when a user is connected to a room, all other connected users are notified about the new user. */
+      userDisconnected: 'userDidDisconnected', /* Event called when a user is disconnected from a room, all other connected users are notified about the users exit. */
+      logUpload: 'didLogUpload', /* Event called when the log is uploaded successfully to the server. */
+      setTalkerCount: 'didSetTalkerCount', /* Event called when the user set number of active talker. */
+      getMaxTalkers: 'didGetMaxTalkers', /* Event to get the maximum number of allowed Active Talkers in the connected room. */
+      getTalkerCount: 'didGetTalkerCount' /* Event called when the user request to get opted active talker streams set by them. */
     },
     android: {
       roomConnected : 'onRoomConnected',
@@ -72,8 +70,6 @@ const sanitizeRoomEvents = (events) => {
       userJoined: 'onUserConnected',
       userDisconnected: 'onUserDisConnected',
       logUpload: 'onLogUploaded',
-      publishStats: 'publishStats',
-      subscribeStats: 'subscribeStats',
       setTalkerCount: 'onSetTalkerCount',
       getMaxTalkers: 'onMaxTalkerCount',
       getTalkerCount: 'onGetTalkerCount'
