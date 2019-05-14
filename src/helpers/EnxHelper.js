@@ -5,7 +5,7 @@ const reassignEvents = (type, customEvents, events) => {
   const newEvents = {};
   const preface = `${type}:`;
   const platform = Platform.OS;
-  console.log(preface,customEvents,events,newEvents);
+  // console.log(preface,customEvents,events,newEvents);
   each(events, (eventHandler, eventType) => {
      if(customEvents[platform][eventType] !== undefined ) {  
       newEvents[`${preface}${customEvents[platform][eventType]}`] = eventHandler;

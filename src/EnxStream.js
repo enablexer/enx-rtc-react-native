@@ -1,36 +1,42 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { View, Platform } from 'react-native';
-import { Enx, removeNativeEvents, nativeEvents, setNativeEvents } from './Enx';
-import EnxPlayerView from './views/EnxPlayerView';
-import {sanitizePlayerViewEvents} from './helpers/EnxStreamHelper';
+import React, { Component } from "react";
+import PropTypes from "prop-types";
+import { View, Platform } from "react-native";
+import { Enx, removeNativeEvents, nativeEvents, setNativeEvents,checkAndroidPermissions } from "./Enx";
+import EnxPlayerView from "./views/EnxPlayerView";
+import { sanitizePlayerViewEvents } from "./helpers/EnxStreamHelper";
 
-import { isNull } from 'underscore';
-const uuid = require('uuid/v4');
+import { isNull } from "underscore";
+const uuid = require("uuid/v4");
 
 class EnxStream extends Component {
   constructor(props) {
     super(props);
-        this.state = {
-      streamId:uuid(),
-    }; 
+    this.state = {
+      streamId: uuid(),
+    };
   }
 
   componentWillMount() {
-      const publisherEvents = sanitizePlayerViewEvents(this.props.eventHandlers);
+    const publisherEvents = sanitizePlayerViewEvents(this.props.eventHandlers);
     setNativeEvents(publisherEvents);
-    console.log("EnxStream.js","componentWillMount"); 
-    Enx.initStream(this.state.streamId);
+    console.log("EnxStream.js", "componentWillMount");
+          Enx.initStream(this.state.streamId);
+
   }
 
-  componentDidMount() { 
+  componentDidMount() {
     // Enx.initStream(this.state.streamId);
-    console.log("EnxStream.js","componentDidMount")
+    console.log("EnxStream.js", "componentDidMount");
   }
-    
+    componentWillUnmount() {
+    const events = sanitizePlayerViewEvents(this.props.eventHandlers);
+
+        removeNativeEvents(events);
+  }
+
   render() {
     if (true) {
-       const { streamId } = this.state;
+      const { streamId } = this.state;
       return <EnxPlayerView streamId={streamId} {...this.props} />;
     }
     return <View />;
@@ -39,10 +45,9 @@ class EnxStream extends Component {
 const viewPropTypes = View.propTypes;
 EnxStream.propTypes = {
   ...viewPropTypes,
-  eventHandlers: PropTypes.object, // eslint-disable-line react/forbid-prop-types
+  eventHandlers: PropTypes.object // eslint-disable-line react/forbid-prop-types
 };
 EnxStream.defaultProps = {
-  eventHandlers: {},
+  eventHandlers: {}
 };
 export default EnxStream;
-

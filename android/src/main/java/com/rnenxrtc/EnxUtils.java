@@ -4,23 +4,18 @@ import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.WritableMap;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import enx_rtc_android.Controller.EnxStream;
 
 public final class EnxUtils {
 
-    protected static JSONObject customJSONObject(String message, String result, String streamId) {
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("result", result);
-            jsonObject.put("message", message);
-            jsonObject.put("streamId", streamId);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return jsonObject;
+    protected static WritableMap customJSONObject(String message, String result, String streamId) {
+        WritableMap streamInfo = Arguments.createMap();
+        streamInfo.putString("result", result);
+        streamInfo.putString("msg", message);
+        streamInfo.putString("streamId", streamId);
+        return streamInfo;
     }
 
     protected static WritableMap prepareJSStreamMap(EnxStream stream) {

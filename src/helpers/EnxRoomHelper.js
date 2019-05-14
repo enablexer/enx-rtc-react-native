@@ -17,8 +17,8 @@ const sanitizeRoomEvents = (events) => {
       streamAdded :'didStreamAdded', /* Event called on stream added in the room. */
       streamSubscribed : 'didSubscribedStream', /* Event called on subscribe stream success. */
       activeTalkerList : 'didActiveTalkerList', /* Event called to get updated active talker list. */
-      recordStarted: 'didRoomRecordStart', /* Event when recording is started in the room, (either implicitly or explicitly), all connected users are notified that room is being recorded.. */
-      recordStopped: 'didRoomRecordStop', /* Event when the recording is turned off (either implicitly or explicitly), all connected users are notified that recording has been stopped in the room. */
+      roomRecordingOn: 'didRoomRecordStart', /* Event when recording is started in the room, (either implicitly or explicitly), all connected users are notified that room is being recorded.. */
+      roomRecordingOff: 'didRoomRecordStop', /* Event when the recording is turned off (either implicitly or explicitly), all connected users are notified that recording has been stopped in the room. */
       startRecordingEvent: 'didStartRecordingEvent', /* Event called when recording started by the moderator. */
       stopRecordingEvent: 'didStopRecordingEvent', /* Event called when recording stopped by the moderator. */
       screenShareStarted: 'didScreenSharedStarted', /* Event called when screen share started. */
@@ -35,12 +35,12 @@ const sanitizeRoomEvents = (events) => {
       unmutedAllUser: 'didUnMutedAllUser', /* Event for called when the room is unmuted by the moderator. Available to Moderator only. */
       hardMutedAll: 'didHardMutedAll', /* Event for Participants when room is muted by any moderator. */
       hardUnmuteAllUser: 'didHardUnMuteAllUser', /* Event for Participants when room is unmuted by any moderator. */
-      userJoined: 'userDidJoined', /* Event when a user is connected to a room, all other connected users are notified about the new user. */
+      userConnected: 'userDidConnected', /* Event when a user is connected to a room, all other connected users are notified about the new user. */
       userDisconnected: 'userDidDisconnected', /* Event called when a user is disconnected from a room, all other connected users are notified about the users exit. */
       logUpload: 'didLogUpload', /* Event called when the log is uploaded successfully to the server. */
-      setTalkerCount: 'didSetTalkerCount', /* Event called when the user set number of active talker. */
-      getMaxTalkers: 'didGetMaxTalkers', /* Event to get the maximum number of allowed Active Talkers in the connected room. */
-      getTalkerCount: 'didGetTalkerCount' /* Event called when the user request to get opted active talker streams set by them. */
+      setTalkerCountResponse: 'didSetTalkerCount', /* Event called when the user set number of active talker. */
+      getMaxTalkersResponse: 'didGetMaxTalkers', /* Event to get the maximum number of allowed Active Talkers in the connected room. */
+      getTalkerCountResponse: 'didGetTalkerCount' /* Event called when the user request to get opted active talker streams set by them. */
     },
     android: {
       roomConnected : 'onRoomConnected',
@@ -51,8 +51,8 @@ const sanitizeRoomEvents = (events) => {
       streamAdded :'onStreamAdded',
       streamSubscribed : 'onSubscribedStream',
       activeTalkerList : 'onActiveTalkerList',
-      recordStarted: 'onRoomRecordingOn',
-      recordStopped: 'onRoomRecordingOff',
+      roomRecordingOn: 'onRoomRecordingOn',
+      roomRecordingOff: 'onRoomRecordingOff',
       screenShareStarted: 'onScreenSharedStarted',
       sceenShareStopped: 'onScreenSharedStopped',
       canvasStarted: 'onCanvasStarted',
@@ -63,16 +63,16 @@ const sanitizeRoomEvents = (events) => {
       grantFloorRequested: 'onGrantedFloorRequest',
       denyFloorRequested: 'onDeniedFloorRequest',
       releaseFloorRequested: 'onReleasedFloorRequest',
-      mutedAllUser: 'onMutedRoom', //Moderator
-      unmutedAllUser: 'onUnMutedRoom',//Moderator
-      hardMutedAll: 'onReceivedMuteRoom',//Participant
-      hardUnmuteAllUser: 'onReceivedUnMutedRoom',//Participant
-      userJoined: 'onUserConnected',
+      mutedAllUser: 'onMutedRoom',
+      unmutedAllUser: 'onUnMutedRoom',
+      hardMutedAll: 'onReceivedMuteRoom',
+      hardUnmuteAllUser: 'onReceivedUnMutedRoom',
+      userConnected: 'onUserConnected',
       userDisconnected: 'onUserDisConnected',
       logUpload: 'onLogUploaded',
-      setTalkerCount: 'onSetTalkerCount',
-      getMaxTalkers: 'onMaxTalkerCount',
-      getTalkerCount: 'onGetTalkerCount'
+      setTalkerCountResponse: 'onSetTalkerCount',
+      getMaxTalkersResponse: 'onMaxTalkerCount',
+      getTalkerCountResponse: 'onGetTalkerCount'
     },
   };
    return reassignEvents('room', customEvents, events);

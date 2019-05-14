@@ -2,7 +2,9 @@ import React, { Component } from 'react';
 import { View, Platform } from 'react-native';
 import PropTypes from 'prop-types';
 import EnxPlayerView from './views/EnxPlayerView';
-import { Enx, nativeEvents } from './Enx';
+import { Enx, nativeEvents,removeNativeEvents } from './Enx';
+import { sanitizePlayerViewEvents } from "./helpers/EnxStreamHelper";
+
 
 export default class EnxSubscribeStream extends Component {
   constructor(props) {
@@ -29,6 +31,11 @@ export default class EnxSubscribeStream extends Component {
     
   }
 
+  componentWillUnmount() {
+    Enx.removeJSComponentEvents(this.componentEventsArray);
+    const events = sanitizePlayerViewEvents(this.props.eventHandlers);
+    removeNativeEvents(events);
+  }
   streamCreatedHandler = (stream) => {
     this.state.streams = [...this.state.streams, stream.streamId]
     }

@@ -20,7 +20,7 @@ RCT_EXTERN_METHOD(initStream:
                   (NSString*)streamId)
 RCT_EXTERN_METHOD(getLocalStreamId:
                   (RCTResponseSenderBlock*)callback)
-RCT_EXTERN_METHOD(subscribeToStream:
+RCT_EXTERN_METHOD(subscribe:
                   (NSString*)streamId
                   callback:(RCTResponseSenderBlock*)callback)
 
@@ -31,12 +31,14 @@ RCT_EXTERN_METHOD(muteSelfAudio:
 RCT_EXTERN_METHOD(muteSelfVideo:
                   (NSString*)streamId value:(BOOL)value)
 
-RCT_EXTERN_METHOD(startRoomRecording)
-RCT_EXTERN_METHOD(stopRoomRecording)
+RCT_EXTERN_METHOD(startRecord)
+RCT_EXTERN_METHOD(stopRecord)
 
 RCT_EXTERN_METHOD(disconnect)
 
 RCT_EXTERN_METHOD(setJSComponentEvents:
+                  (NSArray*)events)
+RCT_EXTERN_METHOD(removeJSComponentEvents:
                   (NSArray*)events)
 RCT_EXTERN_METHOD(setNativeEvents:(NSArray*)events)
 RCT_EXTERN_METHOD(removeNativeEvents:

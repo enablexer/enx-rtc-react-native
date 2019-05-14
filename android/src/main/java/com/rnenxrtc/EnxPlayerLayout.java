@@ -31,7 +31,10 @@ public class EnxPlayerLayout extends FrameLayout {
         if (streamId.length() > 2) {
             ConcurrentHashMap<String, EnxStream> mEnxStream = sharedState.getLocalStream();
             EnxStream localStream = mEnxStream.get(streamId);
-            localStream.attachRenderer(enxPlayerView1);
+            if (localStream != null) {
+//                enxPlayerView1.setZOrderMediaOverlay(true);;
+                localStream.attachRenderer(enxPlayerView1);
+            }
         } else {
             ConcurrentHashMap<String, EnxStream> mEnxStream = sharedState.getRemoteStream();
             EnxStream remoteStream = mEnxStream.get(streamId);
@@ -50,7 +53,5 @@ public class EnxPlayerLayout extends FrameLayout {
         mLocalStreamViewContainers.get(streamId).addView(enxPlayerView);
         requestLayout();
     }
-
 }
-
 

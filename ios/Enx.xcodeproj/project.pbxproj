@@ -13,7 +13,6 @@
 		277A17B4225616C100F44648 /* EnxStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 277A17B0225616C100F44648 /* EnxStream.m */; };
 		277A17B5225616C100F44648 /* EnxStreamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277A17B1225616C100F44648 /* EnxStreamView.swift */; };
 		277A17B6225616C100F44648 /* EnxRN.swift in Sources */ = {isa = PBXBuildFile; fileRef = 277A17B2225616C100F44648 /* EnxRN.swift */; };
-		B3E7B58A1CC2AC0600A0062D /* EnxManager.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* EnxManager.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -38,8 +37,6 @@
 		277A17B0225616C100F44648 /* EnxStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EnxStream.m; sourceTree = "<group>"; };
 		277A17B1225616C100F44648 /* EnxStreamView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EnxStreamView.swift; sourceTree = "<group>"; };
 		277A17B2225616C100F44648 /* EnxRN.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EnxRN.swift; sourceTree = "<group>"; };
-		B3E7B5881CC2AC0600A0062D /* EnxManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EnxManager.h; sourceTree = "<group>"; };
-		B3E7B5891CC2AC0600A0062D /* EnxManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EnxManager.m; sourceTree = "<group>"; };
 		BD902270223B8A9E004F6150 /* Enx-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Enx-Bridging-Header.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -73,8 +70,6 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
-				B3E7B5881CC2AC0600A0062D /* EnxManager.h */,
-				B3E7B5891CC2AC0600A0062D /* EnxManager.m */,
 				2716FED9223E48AB00D1662B /* EnxRoomManager.swift */,
 				2716FEDB223E48C500D1662B /* EnxRoomManager.m */,
 				277A17B2225616C100F44648 /* EnxRN.swift */,
@@ -149,7 +144,6 @@
 				277A17B6225616C100F44648 /* EnxRN.swift in Sources */,
 				277A17B4225616C100F44648 /* EnxStream.m in Sources */,
 				2716FEDC223E48C500D1662B /* EnxRoomManager.m in Sources */,
-				B3E7B58A1CC2AC0600A0062D /* EnxManager.m in Sources */,
 				2716FEDA223E48AB00D1662B /* EnxRoomManager.swift in Sources */,
 				277A17B3225616C100F44648 /* EnxStreamManager.swift in Sources */,
 			);
@@ -247,11 +241,14 @@
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/../example/ios/Pods/**",
 					"$(inherited)",
-					"$(PROJECT_DIR)/../../../ios/Pods/**",
 				);
 				GCC_NO_COMMON_BLOCKS = YES;
-				HEADER_SEARCH_PATHS = "$(inherited)";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../../node_modules/react-native/React/**",
+				);
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "";
 				OTHER_LDFLAGS = (
@@ -271,11 +268,14 @@
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/../example/ios/Pods/**",
 					"$(inherited)",
-					"$(PROJECT_DIR)/../../../ios/Pods/**",
 				);
 				GCC_NO_COMMON_BLOCKS = YES;
-				HEADER_SEARCH_PATHS = "$(inherited)";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../../node_modules/react-native/React/**",
+				);
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "";
 				OTHER_LDFLAGS = (
