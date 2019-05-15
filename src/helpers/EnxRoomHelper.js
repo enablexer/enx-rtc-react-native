@@ -53,6 +53,8 @@ const sanitizeRoomEvents = (events) => {
       activeTalkerList : 'onActiveTalkerList',
       roomRecordingOn: 'onRoomRecordingOn',
       roomRecordingOff: 'onRoomRecordingOff',
+      startRecordingEvent: 'onStartRecordingEvent', 
+      stopRecordingEvent: 'onStopRecordingEvent', 
       screenShareStarted: 'onScreenSharedStarted',
       sceenShareStopped: 'onScreenSharedStopped',
       canvasStarted: 'onCanvasStarted',

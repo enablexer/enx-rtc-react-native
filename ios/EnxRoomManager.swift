@@ -732,12 +732,26 @@ extension EnxRoomManager : EnxRoomDelegate, EnxStreamDelegate,EnxRoomStatsDelega
     /* Stream Delegates */
     
     func didAudioEvents(_ data: [AnyHashable : Any]?) {
-        self.emitEvent(event: "stream:didAudioEvent", data: data as Any)
+        let modifiedDict = ["msg": data?["message"] as Any,
+                            "result": data?["code"] as Any,
+                            ]  as [String : Any]
+        self.emitEvent(event: "stream:didAudioEvent", data: modifiedDict as Any)
     }
     
    
     func didVideoEvents(_ data: [AnyHashable : Any]?) {
-        self.emitEvent(event: "stream:didVideoEvent", data: data as Any)
+        var messageString = ""
+        if data?["message"] as! String == "Unmute" {
+            messageString = "Video on"
+        }
+        else{
+            messageString = "Video off"
+        }
+        let modifiedDict = ["msg": messageString as Any,
+                            "result": data?["code"] as Any,
+                        ]  as [String : Any]
+        
+        self.emitEvent(event: "stream:didVideoEvent", data: modifiedDict as Any)
     }
     
     //Receive all other users
