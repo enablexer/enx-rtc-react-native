@@ -97,7 +97,7 @@ public final class EnxUtils {
 
     protected static WritableMap prepareJSErrorMap(JSONObject jsonObject) {
         WritableMap streamInfo = Arguments.createMap();
-        streamInfo.putInt("errorCode", jsonObject.optInt("errorCode"));
+        streamInfo.putInt("result", jsonObject.optInt("errorCode"));
         streamInfo.putString("msg", jsonObject.optString("msg"));
         return streamInfo;
     }

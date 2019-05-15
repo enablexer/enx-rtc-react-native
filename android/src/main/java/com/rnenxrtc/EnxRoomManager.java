@@ -112,7 +112,11 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
         Log.e("muteSelf", "JAVA");
         ConcurrentHashMap<String, EnxStream> mLocalStream = sharedState.getLocalStream();
         EnxStream stream = mLocalStream.get(localStreamId);
-        stream.muteSelfAudio(value);
+        if (value) {
+            stream.muteSelfAudio(!value);
+        } else {
+            stream.muteSelfAudio(!value);
+        }
     }
 
     @ReactMethod
@@ -120,7 +124,11 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
         Log.e("muteSelfVideo", "JAVA");
         ConcurrentHashMap<String, EnxStream> mLocalStream = sharedState.getLocalStream();
         EnxStream stream = mLocalStream.get(localStreamId);
-        stream.muteSelfVideo(value);
+        if (value) {
+            stream.muteSelfVideo(!value);
+        } else {
+            stream.muteSelfVideo(!value);
+        }
     }
 
     @ReactMethod
@@ -152,7 +160,7 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
     }
 
     @ReactMethod
-    public void subscribeToStream(String streamId, Callback callback) {
+    public void subscribe(String streamId, Callback callback) {
         Log.e("EnxRoomManager", "subscribe");
         ConcurrentHashMap<String, EnxStream> mSubscriberStreams = sharedState.getRemoteStream();
         mEnxRoom.subscribe(mSubscriberStreams.get(streamId));
@@ -172,14 +180,14 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
     }
 
     @ReactMethod
-    public void startRoomRecording() {
+    public void startRecord() {
         if (mEnxRoom != null) {
             mEnxRoom.startRecord();
         }
     }
 
     @ReactMethod
-    public void stopRoomRecording() {
+    public void stopRecord() {
         if (mEnxRoom != null) {
             mEnxRoom.stopRecord();
         }
