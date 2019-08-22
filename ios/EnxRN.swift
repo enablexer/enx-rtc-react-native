@@ -14,9 +14,6 @@ class EnxRN : NSObject {
     var subscriberStreams = [String: EnxStream]()
     var publishStreams = [String: EnxStream]()
     @objc var players = [String: EnxPlayerView]()
-    var publisherDestroyedCallbacks = [String: RCTResponseSenderBlock]()
-    var isPublishing = [String: Bool]()
-    var streamObservers = [String: [NSKeyValueObservation]]()
     override init() {
         super.init()
     }

@@ -18,21 +18,27 @@ class EnxStreamView : UIView {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
     override func layoutSubviews() {
         if streamId != nil{
-        let pp = EnxRN.sharedState.players[(streamId)! as String]
-        let stream = EnxRN.sharedState.subscriberStreams[(streamId)! as String]
-            
-        if pp != nil{
-            pp?.removeFromSuperview()
-            self.addSubview(pp!)
+        let player = EnxRN.sharedState.players[(streamId)! as String]
+        var stream = EnxRN.sharedState.subscriberStreams[(streamId)! as String]
+        if stream == nil {
+              stream = EnxRN.sharedState.publishStreams[(streamId)! as String]
+        }
+        if player != nil{
+            player?.frame = self.bounds
+            player?.removeFromSuperview()
+           // player?.contentMode = UIView.ContentMode.scaleAspectFill
+            self.addSubview(player!)
             if(stream != nil){
-                stream?.attachRenderer(pp!)
+                stream?.attachRenderer(player!)
             }
         }
         else {
             let player = EnxPlayerView.init(frame: self.bounds)
             self.addSubview(player!)
+          //  player?.contentMode = UIView.ContentMode.scaleAspectFill
             EnxRN.sharedState.players.updateValue(player!, forKey: streamId! as String)
             if(stream != nil){
                 stream?.attachRenderer(player!)

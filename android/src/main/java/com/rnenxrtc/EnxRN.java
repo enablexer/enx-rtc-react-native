@@ -11,13 +11,10 @@ public class EnxRN {
     public static EnxRN sharedState;
 
 
-    private ConcurrentHashMap<String, FrameLayout> mLocalPlayerViewContainers = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<String, FrameLayout> mRemotePlayerViewContainers = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, FrameLayout> mPlayerViewContainers = new ConcurrentHashMap<>();
     private ConcurrentHashMap<String, EnxPlayerView> mLocalPlayerView = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<String, EnxPlayerView> mRemotePlayerView = new ConcurrentHashMap<>();
     private ConcurrentHashMap<String, EnxStream> mLocalStream = new ConcurrentHashMap<>();
     private ConcurrentHashMap<String, EnxStream> mRemoteStream = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<String, EnxStream> mActiveStream = new ConcurrentHashMap<>();
 
 
     public static synchronized EnxRN getSharedState() {
@@ -28,25 +25,14 @@ public class EnxRN {
         return sharedState;
     }
 
-    public ConcurrentHashMap<String, FrameLayout> getLocalStreamViewContainers() {
+    public ConcurrentHashMap<String, FrameLayout> getStreamViewContainers() {
 
-        return this.mLocalPlayerViewContainers;
-    }
-
-
-    public ConcurrentHashMap<String, FrameLayout> getRemoteStreamViewContainers() {
-
-        return this.mRemotePlayerViewContainers;
+        return this.mPlayerViewContainers;
     }
 
     public ConcurrentHashMap<String, EnxPlayerView> getPlayerView() {
 
         return this.mLocalPlayerView;
-    }
-
-    public ConcurrentHashMap<String, EnxPlayerView> getRemotePlayerView() {
-
-        return this.mRemotePlayerView;
     }
 
     public ConcurrentHashMap<String, EnxStream> getLocalStream() {
@@ -57,11 +43,6 @@ public class EnxRN {
     public ConcurrentHashMap<String, EnxStream> getRemoteStream() {
 
         return this.mRemoteStream;
-    }
-
-    public ConcurrentHashMap<String, EnxStream> getActiveStream() {
-
-        return this.mActiveStream;
     }
 
     private EnxRN() {

@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { View, Platform } from "react-native";
-import { Enx, removeNativeEvents, nativeEvents, setNativeEvents,checkAndroidPermissions } from "./Enx";
+import { View} from "react-native";
+import { Enx, removeNativeEvents, setNativeEvents } from "./Enx";
 import EnxPlayerView from "./views/EnxPlayerView";
 import { sanitizePlayerViewEvents } from "./helpers/EnxStreamHelper";
 
@@ -20,18 +20,16 @@ class EnxStream extends Component {
     const publisherEvents = sanitizePlayerViewEvents(this.props.eventHandlers);
     setNativeEvents(publisherEvents);
     console.log("EnxStream.js", "componentWillMount");
-          Enx.initStream(this.state.streamId);
-
+    Enx.initStream(this.state.streamId);
   }
 
   componentDidMount() {
-    // Enx.initStream(this.state.streamId);
-    console.log("EnxStream.js", "componentDidMount");
+     console.log("EnxStream.js", "componentDidMount");
   }
-    componentWillUnmount() {
-    const events = sanitizePlayerViewEvents(this.props.eventHandlers);
 
-        removeNativeEvents(events);
+  componentWillUnmount() {
+     const events = sanitizePlayerViewEvents(this.props.eventHandlers);
+     removeNativeEvents(events);
   }
 
   render() {

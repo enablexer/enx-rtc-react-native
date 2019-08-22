@@ -20,7 +20,8 @@ const sanitizePlayerViewEvents = events => {
       remoteStreamAudioMute :'didRemoteStreamAudioMute', /* Event called when a self mute audio alert participant received from server. */
       remoteStreamAudioUnMute:'didRemoteStreamAudioUnMute', /* Event called when a self unmute audio alert participant received from server. */
       remoteStreamVideoMute:'didRemoteStreamVideoMute', /* Event called when a self mute video alert participant received from server. */
-      remoteStreamVideoUnMute:'didRemoteStreamVideoUnMute' /* Event called when a self unmute video alert participant received from server. */
+      remoteStreamVideoUnMute:'didRemoteStreamVideoUnMute', /* Event called when a self unmute video alert participant received from server. */
+      playerStats: 'didPlayerStats'  /* Event called to receive particular player stats */
     },
     android: {
       audioEvent: 'onAudioEvent',
@@ -37,7 +38,8 @@ const sanitizePlayerViewEvents = events => {
       remoteStreamAudioMute :'onRemoteStreamAudioMute',
       remoteStreamAudioUnMute:'onRemoteStreamAudioUnMute',
       remoteStreamVideoMute:'onRemoteStreamVideoMute',
-      remoteStreamVideoUnMute:'onRemoteStreamVideoUnMute'
+      remoteStreamVideoUnMute:'onRemoteStreamVideoUnMute',
+      playerStats:'onPlayerStats',
     }
   };
   return reassignEvents('stream', customEvents, events);

@@ -13,6 +13,6 @@ EnxPlayerView.propTypes = {
   ...viewPropTypes,
 };
 
-const localStreamName = Platform.OS === 'ios' ? 'EnxPlayerViewSwift' : 'EnxPlayerViewManager';
-const ReactPlayer = requireNativeComponent(localStreamName, EnxPlayerView);
+const playerName = Platform.OS === 'ios' ? 'EnxPlayerViewSwift' : 'EnxPlayerViewManager';
+const ReactPlayer = requireNativeComponent(playerName, EnxPlayerView);
 export default EnxPlayerView;

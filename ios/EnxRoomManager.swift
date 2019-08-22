@@ -11,7 +11,6 @@ import EnxRTCiOS
 
 @objc(EnxRoomManager)
 class EnxRoomManager: RCTEventEmitter {
-    private var count = 0
     var localStream : EnxStream!
     var objectJoin: EnxRtc!
     var remoteRoom : EnxRoom!
@@ -30,46 +29,58 @@ class EnxRoomManager: RCTEventEmitter {
     @objc func initRoom(){
         objectJoin = EnxRtc()
     }
-    
-    @objc func connect(_ token: String){
-        let localStreamInfo : NSDictionary = ["video" : true ,"audio" : true ,"data" :true,"usertype":"participant" ,"name" :"ReactNativeiOS","mode" : "group" ,"type" : "public"]
-        guard let localStreamObject = self.objectJoin.joinRoom(token, delegate: self, publishStreamInfo: (localStreamInfo as! [AnyHashable : Any])) else{
-            return
+   
+    @objc func changePlayerScaleType(_ mode: Int, streamId:String?)
+    {
+      DispatchQueue.main.async {
+        guard let player = EnxRN.sharedState.players[streamId!] else {
+            return;
         }
-        self.localStream = localStreamObject
-        self.localStream.delegate = self as EnxStreamDelegate
+        var contentMode = UIView.ContentMode.scaleAspectFit
+        if mode == 1{
+           contentMode = UIView.ContentMode.scaleAspectFill
+        }
+        player.contentMode = contentMode
+      }
     }
     
-    @objc func joinRoom(_ token: String, localInfo: NSDictionary){
-        let localStreamInfo : NSDictionary = localInfo
-        guard let localStreamObject = self.objectJoin.joinRoom(token, delegate: self, publishStreamInfo: (localStreamInfo as! [AnyHashable : Any])) else{
-            return
+    @objc func joinRoom(_ token: String, localInfo: NSDictionary, roomInfo: NSDictionary){
+        DispatchQueue.main.async {
+            let localStreamInfo : NSDictionary = localInfo
+            
+            guard let localStreamObject =    self.objectJoin.joinRoom(token, delegate: self, publishStreamInfo: (localStreamInfo as! [AnyHashable : Any]), reconnectInfo: (roomInfo as! [AnyHashable : Any]), advanceOptions: nil) else{
+                return
+            }
+            self.localStream = localStreamObject
+            self.localStream.delegate = self as EnxStreamDelegate
         }
-         self.localStream = localStreamObject
-        self.localStream.delegate = self as EnxStreamDelegate
     }
     
     
     @objc func publish(){
         
         guard localStream != nil else{
-          return
+            return
         }
-        EnxRN.sharedState.room!.publish(localStream)
+        guard let room = EnxRN.sharedState.room else{
+            return
+        }
+        room.publish(localStream)
     }
     
-    @objc func initStream(_ streamId:String){
-        sleep(2)
+    @objc func initStream(_ streamId:String?){
         guard streamId != nil else{
             return
         }
-        if(localStream != nil){
-            EnxRN.sharedState.publishStreams.updateValue(localStream, forKey: streamId as String)
-            let player : EnxPlayerView = EnxRN.sharedState.players[streamId]!
-            localStream.attachRenderer(player)
-            EnxRN.sharedState.publishStreams.updateValue(localStream, forKey: streamId)
+        DispatchQueue.main.async {
+            if(self.localStream != nil) {
+                EnxRN.sharedState.publishStreams.updateValue(self.localStream, forKey: (streamId)!)
+                guard let player = EnxRN.sharedState.players[streamId!] else{
+                    return;
+                }
+                self.localStream.attachRenderer(player)
+            }
         }
-       
     }
     
     
@@ -77,76 +88,65 @@ class EnxRoomManager: RCTEventEmitter {
         let streamDict = EnxRN.sharedState.publishStreams
         var keyString: String = ""
         for (key, _) in streamDict {
-           keyString = key
+            keyString = key
         }
-          callback([keyString])
+        callback([keyString])
     }
     
-    @objc func subscribe(_ streamId: String, callback: @escaping RCTResponseSenderBlock) -> Void {
-        if(streamId == nil){
-            callback(["Error"])
+    @objc func subscribe(_ streamId: String?, callback: @escaping RCTResponseSenderBlock) -> Void {
+        DispatchQueue.main.async{
+            if(streamId == nil || streamId?.count == 0){
+                callback(["Error: Invalid streamId to subscribe."])
+            }
+            guard let stream = EnxRN.sharedState.room?.streamsByStreamId?[streamId!] as? EnxStream else{
+                return;
+            }
+            EnxRN.sharedState.room!.subscribe(stream)
         }
-        let stream =  EnxRN.sharedState.room?.streamsByStreamId![streamId] as! EnxStream
-        EnxRN.sharedState.room!.subscribe(stream)
-        self.emitEvent(event: "room:didSubscribedStream", data: "Subscribed")
-        
     }
     
     
-    @objc func switchCamera(_ streamId: String){
+    @objc func switchCamera(_ streamId: String?){
         
-        let stream =  EnxRN.sharedState.publishStreams[streamId] as! EnxStream
-        if(stream == nil){
-            return
+        guard let stream = EnxRN.sharedState.publishStreams[streamId!] else{
+            return;
         }
-        else{
-           stream.switchCamera()
-        }
+        stream.switchCamera()
     }
     
     @objc func muteSelfAudio(_ streamId: String, value: Bool){
         
-        let stream =  EnxRN.sharedState.publishStreams[streamId]
-        if(stream == nil){
-            return
+        guard let stream = EnxRN.sharedState.publishStreams[streamId] else{
+            return;
         }
-        else{
-            stream?.muteSelfAudio(value)
-        }
+        stream.muteSelfAudio(value)
+        
         
     }
     
-    @objc func muteSelfVideo(_ streamId: String, value: Bool){
+    @objc func muteSelfVideo(_ streamId: String?, value: Bool){
         
-        let stream =  EnxRN.sharedState.publishStreams[streamId]
-        if(stream == nil){
-            return
+        guard let stream = EnxRN.sharedState.publishStreams[streamId!] else{
+            return;
         }
-        else{
-            stream?.muteSelfVideo(value)
-        }
-        
+        stream.muteSelfVideo(value)
     }
     
     
     @objc func startRecord(){
-        let room =  EnxRN.sharedState.room
-        if(room == nil){
+        guard let room = EnxRN.sharedState.room else{
             return
         }
-        else{
-            room?.startRecord()
-        }
+        room.startRecord()
+        
     }
     
     @objc func stopRecord(){
-        let room =  EnxRN.sharedState.room
-        if(room == nil){
+        guard let room = EnxRN.sharedState.room else{
             return
         }
-        else{
-            room?.stopRecord()
-        }
+        room.stopRecord()
+        
     }
     
     //Chair Control
@@ -155,8 +155,7 @@ class EnxRoomManager: RCTEventEmitter {
         guard let room = EnxRN.sharedState.room else{
             return
         }
-        
-        room .requestFloor()
+        room.requestFloor()
     }
     
     //For Moderator
@@ -189,77 +188,64 @@ class EnxRoomManager: RCTEventEmitter {
     
     //Hard Mute
     
-    @objc func hardMuteAudio(_ streamId: String, _ clientId: String){
-        let stream =  EnxRN.sharedState.publishStreams[streamId]
-        if(stream == nil){
-            return
+    @objc func hardMuteAudio(_ streamId: String?, _ clientId: String){
+        guard let stream = EnxRN.sharedState.publishStreams[streamId!] else{
+            return;
         }
-        else{
-            if clientId.count > 0{
-                stream?.hardMuteAudio(clientId)
-            }
+        if clientId.count > 0{
+          stream.hardMuteAudio(clientId)
         }
     }
     
-    @objc func hardUnmuteAudio(_ streamId: String, _ clientId: String){
-        let stream =  EnxRN.sharedState.publishStreams[streamId]
-        if(stream == nil){
-            return
+    @objc func hardUnmuteAudio(_ streamId: String?, _ clientId: String){
+        guard let stream = EnxRN.sharedState.publishStreams[streamId!] else{
+            return;
         }
-        else{
-            if clientId.count > 0{
-                stream?.hardUnMuteAudio(clientId)
-            }
+        
+        if clientId.count > 0{
+            stream.hardUnMuteAudio(clientId)
         }
     }
     
     @objc func hardMuteVideo(_ streamId: String, _ clientId: String){
-        let stream =  EnxRN.sharedState.publishStreams[streamId]
-        if(stream == nil){
-            return
+        guard let stream = EnxRN.sharedState.publishStreams[streamId] else{
+            return;
         }
-        else{
-            if clientId.count > 0{
-                stream?.hardMuteVideo(clientId)
-            }
+        
+        if clientId.count > 0{
+            stream.hardMuteVideo(clientId)
         }
     }
     
-    @objc func hardUnmuteVideo(_ streamId: String, _ clientId: String){
-        let stream =  EnxRN.sharedState.publishStreams[streamId]
-        if(stream == nil){
-            return
+    @objc func hardUnmuteVideo(_ streamId: String, _ clientId: String) {
+        guard let stream = EnxRN.sharedState.publishStreams[streamId] else{
+            return;
         }
-        else{
-            if clientId.count > 0{
-                stream?.hardUnMuteVideo(clientId)
-            }
+        if clientId.count > 0{
+            stream.hardUnMuteVideo(clientId)
         }
     }
     
     //Hard Room mute
-    @objc func muteAllUser(){
+    @objc func hardMute(){
         guard let room = EnxRN.sharedState.room else{
             return
         }
-        room.muteAllUser()
+        room.hardMute()
     }
     
-    @objc func unMuteAllUser(){
+    @objc func hardUnmute(){
         guard let room = EnxRN.sharedState.room else{
             return
         }
-        room.unMuteAllUser()
+        room.hardUnMute()
     }
     
     @objc func sendData(_ streamId: String, _ data: NSDictionary){
-        let stream =  EnxRN.sharedState.publishStreams[streamId]
-        if(stream == nil){
-            return
+        guard let stream = EnxRN.sharedState.publishStreams[streamId] else{
+            return;
         }
-        else{
-            stream?.sendData(data as! [AnyHashable : Any])
-        }
+            stream.sendData(data as! [AnyHashable : Any])
     }
     
     //Post Client Logs
@@ -282,13 +268,7 @@ class EnxRoomManager: RCTEventEmitter {
         room.postClientLogs()
     }
     
-    @objc func enableStats(_ value: Bool)
-    {
-        guard let room = EnxRN.sharedState.room else {
-            return
-        }
-            room.publishingStats = value
-    }
+  
     
     // Set Active Talker Count
     @objc func setTalkerCount(_ number: Int){
@@ -312,6 +292,7 @@ class EnxRoomManager: RCTEventEmitter {
         room.getMaxTalkers()
     }
     
+    
     @objc func changeToAudioOnly(_ value:Bool){
         guard let room = EnxRN.sharedState.room else{
             return
@@ -319,18 +300,18 @@ class EnxRoomManager: RCTEventEmitter {
         room.change(toAudioOnly: value)
     }
     
-    @objc func muteRemoteStreamInBacground(_ value: Bool){
+    @objc func stopVideoTracksOnApplicationBackground(_ value: Bool, _ videoMuteLocalStream: Bool){
         guard let room = EnxRN.sharedState.room else{
             return
         }
-        room.applicationDidEnterBackground(value)
+        room.stopVideoTracks(onApplicationBackground: value)
     }
     
-    @objc func muteRemoteStreamInForeground(_ value: Bool){
+    @objc func startVideoTracksOnApplicationForeground(_ value: Bool, _ videoMuteLocalStream: Bool){
         guard let room = EnxRN.sharedState.room else{
             return
         }
-        room.applicationWillEnterForeground(value)
+        room.startVideoTracks(onApplicationForeground: value)
     }
     
     //Audio Device methods
@@ -338,7 +319,7 @@ class EnxRoomManager: RCTEventEmitter {
         guard let room = EnxRN.sharedState.room else{
             return
         }
-            room.switchMediaDevice(mediaName)
+        room.switchMediaDevice(mediaName)
     }
     
     @objc func getSelectedDevice(_ callback: @escaping RCTResponseSenderBlock) -> Void {
@@ -355,21 +336,73 @@ class EnxRoomManager: RCTEventEmitter {
         guard let room = EnxRN.sharedState.room else{
             return
         }
-       let deviceArray = room.getDevices()
+        let deviceArray = room.getDevices()
         callback(deviceArray)
         
     }
     
+    //Stats Method
+    @objc func enableStats(_ value: Bool){
+        guard let room = EnxRN.sharedState.room else {
+            return
+        }
+        room.enableStats(value)
+    }
+    
+//    //Send Message
+//    @objc func sendMessage(_ data:NSDictionary, broadCast:Bool, clientIds:NSArray){
+//        guard let room = EnxRN.sharedState.room else {
+//            return
+//        }
+//        room.sendMessage(data as! [AnyHashable : Any], broadCast: broadCast, clientIds: clientIds as? [Any])
+//    }
+
+    //To enable particular player stream stats.
+    @objc func enablePlayerStats(_ value: Bool, _ streamId: String){
+        guard let stream = EnxRN.sharedState.publishStreams[streamId] else{
+            return;
+        }
+        guard stream.enxPlayerView != nil else{
+            return;
+        }
+        stream.enxPlayerView?.delegate = self
+        stream.enxPlayerView?.enablePlayerStats(value)
+    }
+    
+    @objc func setAdvancedOptions(_ options: NSArray ){
+        guard let room = EnxRN.sharedState.room else{
+            return
+        }
+        room.setAdvanceOptions(options as! [Any])
+    }
+    
+    @objc func getAdvancedOptions(){
+        guard let room = EnxRN.sharedState.room else{
+            return
+        }
+        room.getAdvanceOptions()
+    }
+    
+    @objc func captureScreenShot(_ streamId: String){
+        guard let stream = EnxRN.sharedState.publishStreams[streamId] else{
+            return;
+        }
+        guard stream.enxPlayerView != nil else{
+            return;
+        }
+         DispatchQueue.main.async {
+        stream.enxPlayerView?.delegate = self
+        stream.enxPlayerView?.captureScreenShot()
+        }
+    }
     
     @objc func disconnect(){
         
-        let room =  EnxRN.sharedState.room
-        if(room == nil){
+        guard let room = EnxRN.sharedState.room else{
             return
         }
-        else{
-            room?.disconnect()
-        }
+        room.disconnect()
+        
     }
     
     @objc func setNativeEvents(_ events: Array<String>) -> Void {
@@ -387,7 +420,7 @@ class EnxRoomManager: RCTEventEmitter {
             }
         }
     }
-   
+    
     
     @objc func setJSComponentEvents(_ events: Array<String>) -> Void {
         for event in events {
@@ -402,7 +435,7 @@ class EnxRoomManager: RCTEventEmitter {
             }
         }
     }
-
+    
     
     func emitEvent(event : String , data: Any) -> Void {
         if (self.jsEvents.contains(event) || self.componentEvents.contains(event)) {
@@ -412,11 +445,11 @@ class EnxRoomManager: RCTEventEmitter {
 }
 
 
-extension EnxRoomManager : EnxRoomDelegate, EnxStreamDelegate,EnxRoomStatsDelegate
+extension EnxRoomManager : EnxRoomDelegate
 {
     func getSupportedEvents() -> [String] {
         
-        return ["room:didActiveTalkerList","room:didScreenSharedStarted","room:didScreenShareStopped","room:didCanvasStarted","room:didCanvasStopped","room:didRoomRecordStart","room:didRoomRecordStop","room:didFloorRequested","room:didLogUpload","room:publishStats","room:subscribeStats","room:didSetTalkerCount","room:didGetMaxTalkers","room:didGetTalkerCount","room:userDidConnected","room:userDidDisconnected","stream:didAudioEvent","stream:didVideoEvent","stream:didhardMuteAudio","stream:didhardUnmuteAudio","stream:didRemoteStreamAudioMute","stream:didRemoteStreamAudioUnMute","stream:didRemoteStreamVideoMute","stream:didRecievedHardMutedAudio","stream:didRecievedHardUnmutedAudio","stream:didRemoteStreamVideoUnMute","stream:didHardVideoMute","stream:didHardVideoUnMute","stream:didReceivehardMuteVideo","stream:didRecivehardUnmuteVideo","stream:didReceiveData"];
+        return ["room:didActiveTalkerList","room:didScreenSharedStarted","room:didScreenShareStopped","room:didCanvasStarted","room:didCanvasStopped","room:didRoomRecordStart","room:didRoomRecordStop","room:didFloorRequested","room:didLogUpload","room:didSetTalkerCount","room:didGetMaxTalkers","room:didGetTalkerCount","room:userDidConnected","room:userDidDisconnected","room:didHardUnMuteAllUser","room:didHardMutedAll","room:didUnMutedAllUser","room:didMutedAllUser","room:didProcessFloorRequested","room:didFloorRequestReceived","room:didReleaseFloorRequested","room:didDenyFloorRequested","room:didGrantFloorRequested","room:didStopRecordingEvent","room:didStartRecordingEvent","room:didSubscribedStream","room:didDisconnected","room:didStreamAdded","room:didEventError","room:didError","room:didPublishedStream","room:didNotifyDeviceUpdate","room:didStatsReceive","room:didAcknowledgeStats","room:didBandWidthUpdated","room:didShareStreamEvent","room:didRoomConnected","room:didReconnect","room:didUserReconnectSuccess","room:didConnectionInterrupted","room:didConnectionLost","room:didCanvasStreamEvent","room:didAdvanceOptionsUpdate","room:didGetAdvanceOptions","room:didCapturedView","stream:didAudioEvent","stream:didVideoEvent","stream:didhardMuteAudio","stream:didhardUnmuteAudio","stream:didRemoteStreamAudioMute","stream:didRemoteStreamAudioUnMute","stream:didRemoteStreamVideoMute","stream:didRecievedHardMutedAudio","stream:didRecievedHardUnmutedAudio","stream:didRemoteStreamVideoUnMute","stream:didHardVideoMute","stream:didHardVideoUnMute","stream:didReceivehardMuteVideo","stream:didRecivehardUnmuteVideo","stream:didReceiveData","stream:didPlayerStats"];
     }
     
     
@@ -425,23 +458,47 @@ extension EnxRoomManager : EnxRoomDelegate, EnxStreamDelegate,EnxRoomStatsDelega
         self.emitEvent(event: "room:didRoomConnected", data: roomMetadata as Any)
     }
     
-    func room(_ room: EnxRoom?, didError reason: String?) {
+    func room(_ room: EnxRoom?, didError reason: [Any]?) {
         guard let errorVal = reason else{
             return
         }
         self.emitEvent(event: "room:didError", data: errorVal)
     }
-
+    
     func room(_ room: EnxRoom?, didEventError reason: [Any]?) {
-        print(reason as Any);
         guard let resDict = reason?[0] as? [String : Any], reason!.count > 0 else{
             return
         }
         self.emitEvent(event: "room:didEventError", data:resDict)
     }
-
+    
+    func room(_ room: EnxRoom?, didReconnect reason: String?) {
+        guard let reasonString = reason else {
+            return
+        }
+        self.emitEvent(event: "room:didReconnect", data:reasonString)
+    }
+    
+    func room(_ room: EnxRoom, didUserReconnectSuccess data: [AnyHashable : Any]) {
+        
+        self.emitEvent(event: "room:didUserReconnectSuccess", data:data)
+    }
+    
+    func room(_ room: EnxRoom, didConnectionInterrupted data: [Any]) {
+        guard let dataDict = data[0] as? [String : Any], data.count > 0 else{
+            return
+        }
+        self.emitEvent(event: "room:didConnectionInterrupted", data:dataDict)
+    }
+    
+    func room(_ room: EnxRoom, didConnectionLost data: [Any]) {
+        guard let dataDict = data[0] as? [String : Any], data.count > 0 else{
+            return
+        }
+        self.emitEvent(event: "room:didConnectionLost", data:dataDict)
+    }
+    
     func room(_ room: EnxRoom?, didPublishStream stream: EnxStream?) {
-       
         guard let localStream = stream else{
             return
         }
@@ -460,6 +517,19 @@ extension EnxRoomManager : EnxRoomDelegate, EnxStreamDelegate,EnxRoomStatsDelega
         self.emitEvent(event: "room:didStreamAdded", data: resultDict)
     }
     
+    func room(_ room: EnxRoom?, didRemovedStream stream: EnxStream?) {
+        guard stream != nil else{
+            return
+        }
+        guard let subscribeStream = EnxRN.sharedState.subscriberStreams[(stream?.streamId)!] else {
+            return
+        }
+        let resultDict : NSDictionary = ["streamId" : subscribeStream.streamId as Any,"msg": "Stream has removed."]
+        self.emitEvent(event: "room:didRemoveStream", data: resultDict)
+         EnxRN.sharedState.subscriberStreams.removeValue(forKey: subscribeStream.streamId!)
+
+    }
+    
     func room(_ room: EnxRoom?, didSubscribeStream stream: EnxStream?) {
         guard let player = EnxRN.sharedState.players[(stream?.streamId)!] else {
             return
@@ -475,10 +545,9 @@ extension EnxRoomManager : EnxRoomDelegate, EnxStreamDelegate,EnxRoomStatsDelega
             return
         }
         let activeListArray = tempDict["activeList"] as? [Any]
-        //        let resultDict : NSDictionary = ["streamId" : stream.streamId as Any ,"hasData" : stream.hasData() as Any  ,"hasScreen" :stream.screen as Any]
-        self.emitEvent(event: "room:didActiveTalkerList", data: activeListArray)
+        self.emitEvent(event: "room:didActiveTalkerList", data: activeListArray!)
         
-        for (index,active) in (activeListArray?.enumerated())! {
+        for (_,active) in (activeListArray?.enumerated())! {
             // Do this
             let remoteStreamDict = EnxRN.sharedState.room!.streamsByStreamId as! [String : Any]
             let mostActiveDict = active as! [String : Any]
@@ -499,7 +568,9 @@ extension EnxRoomManager : EnxRoomDelegate, EnxStreamDelegate,EnxRoomStatsDelega
         }
         self.emitEvent(event: "room:didScreenSharedStarted", data:shareDict)
         let streamId = String (shareDict["streamId"] as! Int)
-        let shareStream = EnxRN.sharedState.room!.streamsByStreamId![streamId] as! EnxStream
+        guard let shareStream = EnxRN.sharedState.room!.streamsByStreamId![streamId] as? EnxStream else{
+            return
+        }
         guard let player = EnxRN.sharedState.players[streamId] else{
             return
         }
@@ -511,6 +582,11 @@ extension EnxRoomManager : EnxRoomDelegate, EnxStreamDelegate,EnxRoomStatsDelega
         guard let shareDict = Data?[0] as? [String : Any], Data!.count > 0 else{
             return
         }
+        let streamId = String (shareDict["streamId"] as! Int)
+        guard EnxRN.sharedState.players[streamId] != nil else{
+            return
+        }
+        EnxRN.sharedState.players.removeValue(forKey: streamId)
         self.emitEvent(event: "room:didScreenShareStopped", data: shareDict)
     }
     
@@ -521,7 +597,9 @@ extension EnxRoomManager : EnxRoomDelegate, EnxStreamDelegate,EnxRoomStatsDelega
         }
         self.emitEvent(event: "room:didCanvasStarted", data:canvasDict)
         let streamId = String (canvasDict["streamId"] as! Int)
-        let canvasStream = EnxRN.sharedState.room!.streamsByStreamId![streamId] as! EnxStream
+        guard let canvasStream = EnxRN.sharedState.room!.streamsByStreamId![streamId] as? EnxStream else{
+            return
+        }
         guard let player = EnxRN.sharedState.players[streamId] else{
             return
         }
@@ -532,11 +610,16 @@ extension EnxRoomManager : EnxRoomDelegate, EnxStreamDelegate,EnxRoomStatsDelega
         guard let canvasDict = Data?[0] as? [String : Any], Data!.count > 0 else{
             return
         }
+        let streamId = String (canvasDict["streamId"] as! Int)
+        guard EnxRN.sharedState.players[streamId] != nil else{
+            return
+        }
+        EnxRN.sharedState.players.removeValue(forKey: streamId)
         self.emitEvent(event: "room:didCanvasStopped", data: canvasDict)
     }
     
     func roomDidDisconnected(_ status: EnxRoomStatus) {
-       self.emitEvent(event: "room:didDisconnected", data: status)
+        self.emitEvent(event: "room:didDisconnected", data: status)
     }
     
     /* Recording Delegate */
@@ -570,7 +653,7 @@ extension EnxRoomManager : EnxRoomDelegate, EnxStreamDelegate,EnxRoomStatsDelega
         self.emitEvent(event: "room:didRoomRecordStop", data: responseDict)
     }
     
-     /* Chair control Delegates */
+    /* Chair control Delegates */
     //Participant receives on the success of requestFloor. This is for participant only.
     func didFloorRequested(_ Data: [Any]?) {
         guard let dataDict = Data?[0] as? [String : Any], Data!.count>0 else {
@@ -594,7 +677,7 @@ extension EnxRoomManager : EnxRoomDelegate, EnxStreamDelegate,EnxRoomStatsDelega
         self.emitEvent(event: "room:didDenyFloorRequested", data: dataDict)
     }
     
-   /* Participant receives when the moderator performs action releaseFloor. */
+    /* Participant receives when the moderator performs action releaseFloor. */
     func didReleaseFloorRequested(_ Data: [Any]?) {
         guard let dataDict = Data?[0] as? [String : Any], Data!.count>0 else {
             return
@@ -602,7 +685,7 @@ extension EnxRoomManager : EnxRoomDelegate, EnxStreamDelegate,EnxRoomStatsDelega
         self.emitEvent(event: "room:didReleaseFloorRequested", data: dataDict)
     }
     
-   /* Moderator receives any Floor Request raised by the participant. This is for Moderator only. */
+    /* Moderator receives any Floor Request raised by the participant. This is for Moderator only. */
     func didFloorRequestReceived(_ Data: [Any]?) {
         guard let dataDict = Data?[0] as? [String : Any], Data!.count>0 else {
             return
@@ -611,7 +694,7 @@ extension EnxRoomManager : EnxRoomDelegate, EnxStreamDelegate,EnxRoomStatsDelega
     }
     
     
-      /* Moderator receives acknowledgment on performing actions like grantFloor, denyFloor, releaseFloor. */
+    /* Moderator receives acknowledgment on performing actions like grantFloor, denyFloor, releaseFloor. */
     func didProcessFloorRequested(_ Data: [Any]?) {
         guard let dataDict = Data?[0] as? [String : Any], Data!.count>0 else {
             return
@@ -622,24 +705,24 @@ extension EnxRoomManager : EnxRoomDelegate, EnxStreamDelegate,EnxRoomStatsDelega
     
     //Room mute Delegates
     /* This delegate called when the room is muted by the moderator. Available to Moderator only. */
-    func didMutedAllUser(_ Data: [Any]?) {
-        guard let dataDict = Data?[0] as? [String : Any], Data!.count>0 else {
+    func didhardMute(_ Data: [Any]?) {
+    guard let dataDict = Data?[0] as? [String : Any], Data!.count>0 else {
             return
         }
         self.emitEvent(event: "room:didMutedAllUser", data: dataDict)
     }
     
-     /* This delegate called when the room is unmuted by the moderator. Available to Moderator only. */
-    func didUnMutedAllUser(_ Data: [Any]?) {
+    /* This delegate called when the room is unmuted by the moderator. Available to Moderator only. */
+    func didhardUnMute(_ Data: [Any]?) {
         guard let dataDict = Data?[0] as? [String : Any], Data!.count>0 else {
             return
         }
         self.emitEvent(event: "room:didUnMutedAllUser", data: dataDict)
-   
+        
     }
     
     /* Participants notified when room is muted by any moderator. */
-    func didHardMutedAll(_ Data: [Any]?) {
+    func didHardMuteRecived(_ Data: [Any]?) {
         guard let dataDict = Data?[0] as? [String : Any], Data!.count>0 else {
             return
         }
@@ -647,7 +730,7 @@ extension EnxRoomManager : EnxRoomDelegate, EnxStreamDelegate,EnxRoomStatsDelega
     }
     
     /*  */
-    func didHardUnMuteAllUser(_ Data: [Any]?) {
+    func didHardunMuteRecived(_ Data: [Any]?) {
         guard let dataDict = Data?[0] as? [String : Any], Data!.count>0 else {
             return
         }
@@ -678,30 +761,6 @@ extension EnxRoomManager : EnxRoomDelegate, EnxStreamDelegate,EnxRoomStatsDelega
         self.emitEvent(event: "room:didLogUpload", data: dataDict)
     }
     
-    //Stats Delegate
-    
-    func room(_ room: EnxRoom!, publishingClient: EnxClient!, mediaType: String!, ssrc: String!, publishingAtKbps kbps: Int, didReceiveStats statsReport: RTCLegacyStatsReport!) {
-        
-        let statsDict = ["subscribeClient": publishingClient.streamId,
-                         "mediaType": mediaType,
-                         "ssrc": ssrc,
-                         "kbps": kbps,
-                         "statsReport": statsReport]  as [String : Any]
-        
-        self.emitEvent(event: "room:publishStats", data: statsDict)
-    }
-    
-    func room(_ room: EnxRoom!, subscribeClient: EnxClient!, mediaType: String!, ssrc: String!, subscribeAtKbps kbps: Int, didReceiveStats statsReport: RTCLegacyStatsReport!) {
-        
-        let statsDict = ["subscribeClient": subscribeClient.streamId,
-                    "mediaType": mediaType,
-                    "ssrc": ssrc,
-                    "kbps": kbps,
-                    "statsReport": statsReport]  as [String : Any]
-        
-        self.emitEvent(event: "room:subscribeStats", data: statsDict)
-
-    }
     
     //Set and Get Active talker Delegates.
     /* Client endpoint receives when the user set number of active talker. */
@@ -728,30 +787,81 @@ extension EnxRoomManager : EnxRoomDelegate, EnxStreamDelegate,EnxRoomStatsDelega
         self.emitEvent(event: "room:didGetTalkerCount", data: dataDict)
     }
     
+    /**
+     This delegate Method Will Notify app user for any Audio media changes happen recentaly(Like :- New device connected/Doisconnected).
+     */
+    func didNotifyDeviceUpdate(_ updates: String) {
+        self.emitEvent(event: "room:didNotifyDeviceUpdate", data: updates)
+      
+    }
     
+    /*
+     This method will update once stats enable and update to app user for stats
+     @param statsData has all stats information.
+     */
+    func didStatsReceive(_ statsData: [Any]) {
+        self.emitEvent(event: "room:didStatsReceive", data: statsData)
+    }
+    
+    func didAcknowledgeStats(_ subUnSubResponse: [Any]) {
+        self.emitEvent(event: "room:didAcknowledgeStats", data: subUnSubResponse)
+    }
+    
+    //ABWD delegates
+    func room(_ room: EnxRoom?, didBandWidthUpdated data: [Any]?) {
+        guard let Data = data?[0] as? [String : Any] else {
+            return
+        }
+        self.emitEvent(event: "room:didBandWidthUpdated", data: Data)
+    }
+    
+    func room(_ room: EnxRoom?, didCanvasStreamEvent data: [Any]?) {
+        guard let Data = data?[0] as? [String : Any] else {
+            return
+        }
+        self.emitEvent(event: "room:didCanvasStreamEvent", data: Data)
+    }
+    
+    func room(_ room: EnxRoom?, didShareStreamEvent data: [Any]?) {
+        guard let Data = data?[0] as? [String : Any] else {
+            return
+        }
+        self.emitEvent(event: "room:didShareStreamEvent", data: Data)
+    }
+    
+//    func room(_ room: EnxRoom, didReceiveChatDataAtRoom data: [Any]?) {
+//        guard let Data = data?[0] as? [String : Any] else {
+//            return
+//        }
+//        self.emitEvent(event: "room:didReceiveChatDataAtRoom", data: Data)
+//    }
+//
+    
+    
+    func room(_ room: EnxRoom?, didAdvanceOptionsUpdate data: [AnyHashable : Any]? = nil) {
+        self.emitEvent(event: "room:didAdvanceOptionsUpdate", data: data as Any)
+
+    }
+    
+    func room(_ room: EnxRoom?, didGetAdvanceOptions data: [Any]?) {
+        if(data!.count > 0){
+            print(data![0])
+            self.emitEvent(event: "room:didGetAdvanceOptions", data: data![0] )
+            
+        }
+    }
+}
+
+extension EnxRoomManager :  EnxStreamDelegate
+{
     /* Stream Delegates */
     
     func didAudioEvents(_ data: [AnyHashable : Any]?) {
-        let modifiedDict = ["msg": data?["message"] as Any,
-                            "result": data?["code"] as Any,
-                            ]  as [String : Any]
-        self.emitEvent(event: "stream:didAudioEvent", data: modifiedDict as Any)
+        self.emitEvent(event: "stream:didAudioEvent", data: data as Any)
     }
     
-   
     func didVideoEvents(_ data: [AnyHashable : Any]?) {
-        var messageString = ""
-        if data?["message"] as! String == "Unmute" {
-            messageString = "Video on"
-        }
-        else{
-            messageString = "Video off"
-        }
-        let modifiedDict = ["msg": messageString as Any,
-                            "result": data?["code"] as Any,
-                        ]  as [String : Any]
-        
-        self.emitEvent(event: "stream:didVideoEvent", data: modifiedDict as Any)
+        self.emitEvent(event: "stream:didVideoEvent", data: data as Any)
     }
     
     //Receive all other users
@@ -854,13 +964,24 @@ extension EnxRoomManager : EnxRoomDelegate, EnxStreamDelegate,EnxRoomStatsDelega
         self.emitEvent(event: "stream:didRecivehardUnmuteVideo", data: dataDict)
     }
     
-    //Recevie data API
+    //Receive data API
     func didReceiveData(_ data: [AnyHashable : Any]?) {
         if data != nil{
-         self.emitEvent(event: "stream:didReceiveData", data: data as Any)
+            self.emitEvent(event: "stream:didReceiveData", data: data as Any)
         }
     }
+  }
+
+
+extension EnxRoomManager : EnxPlayerDelegate
+{
+    func didPlayerStats(_ data: [AnyHashable : Any]) {
+        self.emitEvent(event: "stream:didPlayerStats", data: data)
+    }
     
-    
-    
+    func didCapturedView(_ snapShot: UIImage) {
+        let imageData:NSData = snapShot.pngData()! as NSData
+        let base64String = imageData.base64EncodedString(options: NSData.Base64EncodingOptions(rawValue: 0))
+        self.emitEvent(event: "room:didCapturedView", data: base64String)
+    }
 }
