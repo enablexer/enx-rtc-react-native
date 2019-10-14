@@ -103,7 +103,8 @@ RCT_EXTERN_METHOD(getDevices:(RCTResponseSenderBlock*)callback)
 RCT_EXTERN_METHOD(enablePlayerStats:(BOOL)value streamId:(NSString *)streamId)
 RCT_EXTERN_METHOD(enableStats:(BOOL)value)
 
-
+// Set player configuration option.
+RCT_EXTERN_METHOD(setConfigureOption:(NSDictionary *)options streamId:(NSString *)streamId)
 
 //Set Advance Options
 RCT_EXTERN_METHOD(setAdvancedOptions:(NSArray *)options)
@@ -112,5 +113,14 @@ RCT_EXTERN_METHOD(getAdvancedOptions)
 
 // To capture player view screen shot
 RCT_EXTERN_METHOD(captureScreenShot:(NSString *)streamId)
+
+
+// Send message at Room level.
+
+RCT_EXTERN_METHOD(sendMessage:(NSString *)data broadcast:(BOOL)broadcast clientIds:(NSArray *)clientIds)
+RCT_EXTERN_METHOD(sendUserData:(NSString *)data broadcast:(BOOL)broadcast clientIds:(NSArray *)clientIds)
+
+// To switch user role.
+RCT_EXTERN_METHOD(switchUserRole:(NSString *)clientId)
 
 @end

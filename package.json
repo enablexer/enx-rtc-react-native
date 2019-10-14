@@ -1,6 +1,6 @@
 {
   "name": "enx-rtc-react-native",
-  "version": "1.4.0",
+  "version": "1.4.2",
   "description": "It is a react native component for Enablex users.",
   "main": "src/index.js",
   "scripts": {
@@ -13,25 +13,24 @@
     "format": "eslint --fix src"
   },
   "keywords": [
-      "react-native",
-      "enablex",
-      "enx",
-      "webrtc",
-      "ios",
-      "android",
-      "video",
-      "live",
-      "react",
-      "chat",
-      "cpass"
+    "react-native",
+    "enablex",
+    "enx",
+    "webrtc",
+    "ios",
+    "android",
+    "video",
+    "live",
+    "react",
+    "chat",
+    "cpass"
   ],
   "author": "enablex",
   "license": "Vcloudx License, Version 1.1', :text => 'https://www.enablex.io/legals/tou/",
-  "repository":{
-      "type": "git",
-      "url": "https://github.com/enablexer/enx-rtc-react-native.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/enablexer/enx-rtc-react-native.git"
   },
-
   "devDependencies": {
     "@babel/plugin-external-helpers": "^7.2.0",
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.2.0",
@@ -51,7 +50,7 @@
     "react-native-axios": "^0.17.1",
     "react-native-easy-toast": "^1.2.0",
     "react-native-enhanced-popup-menu": "^0.6.1",
-    "react-native-navigation": "^3.0.0-alpha.9",
+    "react-native-navigation": "^3.2.0",
     "underscore": "^1.9.1"
   }
 }

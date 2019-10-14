@@ -27,8 +27,11 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
-import enx_rtc_android.Controller.AdvancedOptionsObserver;
+import javax.annotation.Nonnull;
+
+import enx_rtc_android.Controller.EnxAdvancedOptionsObserver;
 import enx_rtc_android.Controller.EnxBandwidthObserver;
+import enx_rtc_android.Controller.EnxCanvasObserver;
 import enx_rtc_android.Controller.EnxChairControlObserver;
 import enx_rtc_android.Controller.EnxLogsObserver;
 import enx_rtc_android.Controller.EnxLogsUtil;
@@ -50,7 +53,7 @@ import enx_rtc_android.Controller.EnxStream;
 import enx_rtc_android.Controller.EnxStreamObserver;
 import enx_rtc_android.Controller.EnxTalkerObserver;
 
-public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoomObserver, EnxStreamObserver, EnxRecordingObserver, EnxScreenShareObserver, EnxTalkerObserver, EnxLogsObserver, EnxChairControlObserver, EnxMuteRoomObserver, EnxMuteAudioStreamObserver, EnxMuteVideoStreamObserver, EnxStatsObserver, EnxPlayerStatsObserver, EnxBandwidthObserver, EnxNetworkObserever, EnxReconnectObserver, EnxScreenShotObserver, AdvancedOptionsObserver {
+public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoomObserver, EnxStreamObserver, EnxRecordingObserver, EnxScreenShareObserver, EnxTalkerObserver, EnxLogsObserver, EnxChairControlObserver, EnxMuteRoomObserver, EnxMuteAudioStreamObserver, EnxMuteVideoStreamObserver, EnxStatsObserver, EnxPlayerStatsObserver, EnxBandwidthObserver, EnxNetworkObserever, EnxReconnectObserver, EnxScreenShotObserver, EnxAdvancedOptionsObserver, EnxCanvasObserver {
     private ReactApplicationContext mReactContext = null;
     private ArrayList<String> jsEvents = new ArrayList<String>();
     private ArrayList<String> componentEvents = new ArrayList<String>();
@@ -73,7 +76,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
         try {
             for (int i = 0; i < events.size(); i++) {
                 jsEvents.add(events.getString(i));
-                Log.e("setNativeEvents", jsEvents.get(i).toString());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -82,7 +84,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @ReactMethod
     public void initRoom() {
-        Log.e("EnxRoomManager", "init");
         enxRtc = new EnxRtc(mReactContext.getCurrentActivity(), this, this);
     }
 
@@ -95,7 +96,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @ReactMethod
     public void setJSComponentEvents(ReadableArray events) {
-        Log.e("EnxRoomManager", "setJSComponentEvents");
         for (int i = 0; i < events.size(); i++) {
             componentEvents.add(events.getString(i));
         }
@@ -109,16 +109,14 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
     }
 
     @ReactMethod
-    public void joinRoom(String token, ReadableMap localStreamInfo, ReadableMap roomInfo) {
-        Log.e("RtcManager", localStreamInfo.toString() + " " + roomInfo.toString());
+    public void joinRoom(String token, ReadableMap localStreamInfo, ReadableMap roomInfo, ReadableMap advanceOptions) {
         if (enxRtc != null) {
-            localStream = enxRtc.joinRoom(token, getLocalStreamJsonObject(localStreamInfo), getRoomInfoObject(roomInfo));
+            localStream = enxRtc.joinRoom(token, getLocalStreamJsonObject(localStreamInfo), getRoomInfoObject(roomInfo), getAdvancedOptionsObject(advanceOptions));
         }
     }
 
     @ReactMethod
     public void muteSelfAudio(String localStreamId, boolean value) {
-        Log.e("muteSelf", "JAVA");
         ConcurrentHashMap<String, EnxStream> mLocalStream = sharedState.getLocalStream();
         EnxStream stream = mLocalStream.get(localStreamId);
         if (stream != null) {
@@ -128,7 +126,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @ReactMethod
     public void muteSelfVideo(String localStreamId, boolean value) {
-        Log.e("muteSelfVideo", "JAVA");
         ConcurrentHashMap<String, EnxStream> mLocalStream = sharedState.getLocalStream();
         EnxStream stream = mLocalStream.get(localStreamId);
         if (stream != null) {
@@ -138,7 +135,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @ReactMethod
     public void initStream(String streamId) {
-        Log.e("initStream", streamId);
         ConcurrentHashMap<String, EnxStream> mEnxStream = sharedState.getLocalStream();
         if (localStream != null) {
             mEnxStream.put(streamId, localStream);
@@ -148,9 +144,7 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @ReactMethod
     public void publish() {
-        Log.e("EnxRoomManager", "publish");
         if (localStreamId != null) {
-            Log.e("EnxRoomManagerPublish", localStreamId);
             ConcurrentHashMap<String, EnxStream> mEnxStream = sharedState.getLocalStream();
             EnxStream localStream = mEnxStream.get(localStreamId);
             mEnxRoom.publish(localStream);
@@ -161,7 +155,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @ReactMethod
     public void subscribe(String streamId, Callback callback) {
-        Log.e("EnxRoomManager", "subscribe");
         ConcurrentHashMap<String, EnxStream> mSubscriberStreams = sharedState.getRemoteStream();
         mEnxRoom.subscribe(mSubscriberStreams.get(streamId));
         callback.invoke("Stream subscribed successfully.");
@@ -176,7 +169,9 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
     public void switchCamera(String localStreamId) {
         ConcurrentHashMap<String, EnxStream> mLocalStream = sharedState.getLocalStream();
         EnxStream stream = mLocalStream.get(localStreamId);
-        stream.switchCamera();
+        if (stream != null) {
+            stream.switchCamera();
+        }
     }
 
     @ReactMethod
@@ -302,7 +297,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @ReactMethod
     public void changeToAudioOnly(boolean value) {
-        Log.e("changeToAudioOnly", String.valueOf(value));
         if (mEnxRoom != null) {
             mEnxRoom.changeToAudioOnly(value);
         }
@@ -310,34 +304,38 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @ReactMethod
     public void hardMuteAudio(String streamId, String clientId) {
-        Log.e("hardMuteAudio", clientId);
         ConcurrentHashMap<String, EnxStream> mEnxStream = sharedState.getLocalStream();
         EnxStream localStream = mEnxStream.get(streamId);
-        localStream.hardMuteAudio(clientId);
+        if (localStream != null) {
+            localStream.hardMuteAudio(clientId);
+        }
     }
 
     @ReactMethod
     public void hardUnmuteAudio(String streamId, String clientId) {
-        Log.e("hardUnmuteAudio", clientId);
         ConcurrentHashMap<String, EnxStream> mEnxStream = sharedState.getLocalStream();
         EnxStream localStream = mEnxStream.get(streamId);
-        localStream.hardUnMuteAudio(clientId);
+        if (localStream != null) {
+            localStream.hardUnMuteAudio(clientId);
+        }
     }
 
     @ReactMethod
     public void hardMuteVideo(String streamId, String clientId) {
-        Log.e("hardMuteVideo", clientId);
         ConcurrentHashMap<String, EnxStream> mEnxStream = sharedState.getLocalStream();
         EnxStream localStream = mEnxStream.get(streamId);
-        localStream.hardMuteVideo(clientId);
+        if (localStream != null) {
+            localStream.hardMuteVideo(clientId);
+        }
     }
 
     @ReactMethod
     public void hardUnmuteVideo(String streamId, String clientId) {
-        Log.e("hardUnmuteVideo", clientId);
         ConcurrentHashMap<String, EnxStream> mEnxStream = sharedState.getLocalStream();
         EnxStream localStream = mEnxStream.get(streamId);
-        localStream.hardUnMuteVideo(clientId);
+        if (localStream != null) {
+            localStream.hardUnMuteVideo(clientId);
+        }
     }
 
     @ReactMethod
@@ -356,7 +354,9 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @ReactMethod
     public void changePlayerScaleType(final int mode, final String streamId) {
-        Log.e("changePlayerScaleType", String.valueOf(mode) + " " + streamId);
+        if (mReactContext.getCurrentActivity() == null) {
+            return;
+        }
         mReactContext.getCurrentActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -374,7 +374,9 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @ReactMethod
     public void setZOrderMediaOverlay(final boolean isOverlay, final String streamId) {
-        Log.e("setZOrderMediaOverlay", String.valueOf(isOverlay) + " " + streamId);
+        if (mReactContext.getCurrentActivity() == null) {
+            return;
+        }
         mReactContext.getCurrentActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -387,8 +389,28 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
     }
 
     @ReactMethod
+    public void setConfigureOption(final ReadableMap dataObject, final String streamId) {
+        Log.e("setConfigureOption", dataObject.toString());
+        if (mReactContext.getCurrentActivity() == null) {
+            return;
+        }
+        mReactContext.getCurrentActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ConcurrentHashMap<String, EnxPlayerView> mPlayers = sharedState.getPlayerView();
+                if (mPlayers.containsKey(streamId)) {
+                    try {
+                        mPlayers.get(streamId).setConfigureOption(EnxUtils.convertMapToJson(dataObject));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
+
+    @ReactMethod
     public void enableStats(boolean isEnabled) {
-        Log.e("enableStats", String.valueOf(isEnabled));
         if (mEnxRoom != null) {
             mEnxRoom.enableStats(true, this);
         }
@@ -396,7 +418,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @ReactMethod
     public void enablePlayerStats(boolean isEnabled, String streamId) {
-        Log.e("enableStats", String.valueOf(isEnabled));
         ConcurrentHashMap<String, EnxPlayerView> playerView = sharedState.getPlayerView();
         if (playerView.get(streamId) != null) {
             playerView.get(streamId).enablePlayerStats(isEnabled, this);
@@ -406,40 +427,38 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @ReactMethod
     public void sendData(String streamId, ReadableMap dataObject) {
-        Log.e("sendData", dataObject.toString());
         ConcurrentHashMap<String, EnxStream> mEnxStream = sharedState.getLocalStream();
         EnxStream localStream = mEnxStream.get(streamId);
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("message", dataObject.getString("message"));
             jsonObject.put("from", dataObject.getString("from"));
-//            jsonObject.put("timestamp", dataObject.getDouble("timestamp"));
             jsonObject.put("timestamp", dataObject.getDynamic("timestamp"));
-            localStream.sendData(jsonObject);
-
+            if (localStream != null) {
+                localStream.sendData(jsonObject);
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-//    @ReactMethod
-//    public void sendMessage(ReadableMap dataObject,boolean broadcast,ReadableArray clientList) {
-//        Log.e("sendMessage", clientList.toString());
-//        JSONObject jsonObject = new JSONObject();
-//        try {
-//            jsonObject.put("message", dataObject.getString("message"));
-//            jsonObject.put("from", dataObject.getString("from"));
-//            jsonObject.put("timestamp", dataObject.getDynamic("timestamp"));
-//            mEnxRoom.sendMessage(jsonObject, true, null);
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
-//    }
+    @ReactMethod
+    public void sendMessage(String message, boolean broadcast, ReadableArray clientList) {
+        if (mEnxRoom != null) {
+            mEnxRoom.sendMessage(message, broadcast, Arguments.toList(clientList));
+        }
+    }
+
+    @ReactMethod
+    public void sendUserData(String message, boolean broadcast, ReadableArray clientList) {
+        if (mEnxRoom != null) {
+            mEnxRoom.sendUserData(message, broadcast, Arguments.toList(clientList));
+        }
+    }
 
     @ReactMethod
     public void setAdvancedOptions(ReadableArray array) {
-        Log.e("setAdvancedOptions", array.toString());
-        if(mEnxRoom!=null){
+        if (mEnxRoom != null) {
             try {
                 mEnxRoom.setAdvancedOptions(EnxUtils.convertArrayToJson(array), EnxRoomManager.this);
             } catch (JSONException e) {
@@ -449,15 +468,17 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
     }
 
     @ReactMethod
-    public void getAdvancedOptions(){
-        if(mEnxRoom!=null){
+    public void getAdvancedOptions() {
+        if (mEnxRoom != null) {
             mEnxRoom.getAdvancedOptions();
         }
     }
 
     @ReactMethod
     public void captureScreenShot(final String streamId) {
-        Log.e("captureScreenShot", streamId);
+        if (mReactContext.getCurrentActivity() == null) {
+            return;
+        }
         mReactContext.getCurrentActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -470,11 +491,17 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
     }
 
     @ReactMethod
+    public void switchUserRole(String clientId) {
+        if (mEnxRoom != null) {
+            mEnxRoom.switchUserRole(clientId);
+        }
+    }
+
+    @ReactMethod
     public void disconnect() {
         if (mEnxRoom != null) {
             ConcurrentHashMap<String, EnxPlayerView> playerView = sharedState.getPlayerView();
             for (String key : playerView.keySet()) {
-                Log.e("disconnectLocalPlayer", key);
                 if (key.length() > 1) {
                     EnxPlayerView playerView1 = playerView.get(key);
                     if (playerView1 != null) {
@@ -487,6 +514,7 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
         }
     }
 
+    @Nonnull
     @Override
     public String getName() {
         return this.getClass().getSimpleName();
@@ -494,7 +522,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onRoomConnected(EnxRoom enxRoom, JSONObject jsonObject) {
-        Log.e("onRoomConnected", jsonObject.toString());
         mEnxRoom = enxRoom;
         WritableMap streamInfo = null;
         try {
@@ -512,20 +539,24 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
         mEnxRoom.setBandwidthObserver(this);
         mEnxRoom.setNetworkChangeObserver(this);
         mEnxRoom.setReconnectObserver(this);
+        mEnxRoom.setCanvasObserver(this);
     }
 
     @Override
     public void onRoomError(JSONObject jsonObject) {
-        Log.e("onRoomError", jsonObject.toString());
         ConcurrentHashMap<String, EnxStream> mLocalStream = sharedState.getLocalStream();
         for (String key : mLocalStream.keySet()) {
             EnxStream stream = mLocalStream.get(key);
-            stream.detachRenderer();
+            if (stream != null) {
+                stream.detachRenderer();
+            }
         }
         ConcurrentHashMap<String, EnxStream> mRemoteStream = sharedState.getRemoteStream();
         for (String key : mRemoteStream.keySet()) {
             EnxStream stream = mRemoteStream.get(key);
-            stream.detachRenderer();
+            if (stream != null) {
+                stream.detachRenderer();
+            }
         }
         if (mEnxRoom != null) {
             mEnxRoom = null;
@@ -543,33 +574,28 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onUserConnected(JSONObject jsonObject) {
-        Log.e("onUserConnected", jsonObject.toString());
         WritableMap streamInfo = EnxUtils.prepareJSUserMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), roomPreface + "onUserConnected", streamInfo);
     }
 
     @Override
     public void onUserDisConnected(JSONObject jsonObject) {
-        Log.e("onUserDisConnected", jsonObject.toString());
         WritableMap streamInfo = EnxUtils.prepareJSUserMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), roomPreface + "onUserDisConnected", streamInfo);
     }
 
     @Override
     public void onPublishedStream(EnxStream enxStream) {
-        Log.e("onPublishedStream", enxStream.toString());
         WritableMap streamInfo = EnxUtils.customJSONObject("The stream has been published.", "0", localStreamId);
         sendEventMap(this.getReactApplicationContext(), roomPreface + "onPublishedStream", streamInfo);
     }
 
     @Override
     public void onUnPublishedStream(EnxStream enxStream) {
-        Log.e("onUnPublishedStream", enxStream.toString());
     }
 
     @Override
     public void onStreamAdded(EnxStream enxStream) {
-        Log.e("onStreamAdded", enxStream.toString());
         ConcurrentHashMap<String, EnxStream> mSubscriberStreams = sharedState.getRemoteStream();
         mSubscriberStreams.put(enxStream.getId(), enxStream);
         WritableMap streamInfo = EnxUtils.prepareJSStreamMap(enxStream);
@@ -578,7 +604,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onSubscribedStream(EnxStream enxStream) {
-        Log.e("onSubscribedStream", enxStream.toString());
         ConcurrentHashMap<String, EnxStream> mSubscriberStreams = sharedState.getRemoteStream();
         mSubscriberStreams.put(enxStream.getId(), enxStream);
         WritableMap streamInfo = EnxUtils.prepareJSStreamMap(enxStream);
@@ -587,21 +612,23 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onUnSubscribedStream(EnxStream enxStream) {
-        Log.e("onSubscribedStream", enxStream.toString());
     }
 
     @Override
     public void onRoomDisConnected(JSONObject jsonObject) {
-        Log.e("onRoomDisConnected", jsonObject.toString());
         ConcurrentHashMap<String, EnxStream> mLocalStream = sharedState.getLocalStream();
         for (String key : mLocalStream.keySet()) {
             EnxStream stream = mLocalStream.get(key);
-            stream.detachRenderer();
+            if (stream != null) {
+                stream.detachRenderer();
+            }
         }
         ConcurrentHashMap<String, EnxStream> mRemoteStream = sharedState.getRemoteStream();
         for (String key : mRemoteStream.keySet()) {
             EnxStream stream = mRemoteStream.get(key);
-            stream.detachRenderer();
+            if (stream != null) {
+                stream.detachRenderer();
+            }
         }
         if (mEnxRoom != null) {
             mEnxRoom = null;
@@ -609,7 +636,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
         if (enxRtc != null) {
             enxRtc = null;
         }
-        Log.e("onRoomDisConnected", jsonObject.toString());
         WritableMap streamInfo = EnxUtils.prepareJSResultMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), roomPreface + "onRoomDisConnected", streamInfo);
         sharedState = null;
@@ -617,7 +643,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onActiveTalkerList(JSONObject jsonObject) {
-        Log.e("onActiveTalkerList", jsonObject.toString());
         try {
             sendEventMapArray(this.getReactApplicationContext(), roomPreface + "onActiveTalkerList", EnxUtils.convertJsonToArray(jsonObject.optJSONArray("activeList")));
         } catch (JSONException e) {
@@ -627,7 +652,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onEventError(JSONObject jsonObject) {
-        Log.e("onEventError", jsonObject.toString());
         try {
             sendEventMap(this.getReactApplicationContext(), roomPreface + "onEventError", EnxUtils.jsonToReact(jsonObject));
         } catch (JSONException e) {
@@ -636,21 +660,32 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
     }
 
     @Override
+    public void onEventInfo(JSONObject jsonObject) {
+
+    }
+
+    @Override
     public void onNotifyDeviceUpdate(String s) {
-        Log.e("onNotifyDeviceUpdate", s);
         sendEventWithString(this.getReactApplicationContext(), roomPreface + "onNotifyDeviceUpdate", String.valueOf(s));
     }
 
     @Override
+    public void onAcknowledgedSendData(JSONObject jsonObject) {
+        try {
+            sendEventMap(this.getReactApplicationContext(), roomPreface + "onAcknowledgedSendData", EnxUtils.jsonToReact(jsonObject));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public void onCanvasStarted(JSONObject jsonObject) {
-        Log.e("onCanvasStarted", jsonObject.toString());
         WritableMap streamInfo = EnxUtils.prepareJSShareStreamMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), roomPreface + "onCanvasStarted", streamInfo);
     }
 
     @Override
     public void onCanvasStopped(JSONObject jsonObject) {
-        Log.e("onCanvasStopped", jsonObject.toString());
         ConcurrentHashMap<String, EnxPlayerView> mPlayers = sharedState.getPlayerView();
         if (mPlayers.containsKey(jsonObject.optString("streamId"))) {
             mPlayers.remove(jsonObject.optString("streamId"));
@@ -665,7 +700,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onReceivedChatDataAtRoom(JSONObject jsonObject) {
-        Log.e("onReceivedChatDataRoom", jsonObject.toString());
         try {
             sendEventMap(this.getReactApplicationContext(), roomPreface + "onReceivedChatDataAtRoom", EnxUtils.jsonToReact(jsonObject));
         } catch (JSONException e) {
@@ -674,8 +708,25 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
     }
 
     @Override
+    public void onSwitchedUserRole(JSONObject jsonObject) {
+        try {
+            sendEventMap(this.getReactApplicationContext(), roomPreface + "onSwitchedUserRole", EnxUtils.jsonToReact(jsonObject));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onUserRoleChanged(JSONObject jsonObject) {
+        try {
+            sendEventMap(this.getReactApplicationContext(), roomPreface + "onUserRoleChanged", EnxUtils.jsonToReact(jsonObject));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public void onAudioEvent(JSONObject jsonObject) {
-        Log.e("onAudioEvent", jsonObject.toString());
         try {
             sendEventMap(this.getReactApplicationContext(), streamPreface + "onAudioEvent", EnxUtils.jsonToReact(jsonObject));
         } catch (JSONException e) {
@@ -685,7 +736,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onVideoEvent(JSONObject jsonObject) {
-        Log.e("onVideoEvent", jsonObject.toString());
         try {
             sendEventMap(this.getReactApplicationContext(), streamPreface + "onVideoEvent", EnxUtils.jsonToReact(jsonObject));
         } catch (JSONException e) {
@@ -695,7 +745,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onReceivedData(JSONObject jsonObject) {
-        Log.e("onReceivedData", jsonObject.toString());
         try {
             sendEventMap(this.getReactApplicationContext(), streamPreface + "onReceivedData", EnxUtils.jsonToReact(jsonObject));
         } catch (JSONException e) {
@@ -705,7 +754,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onRemoteStreamAudioMute(JSONObject jsonObject) {
-        Log.e("onRemoteStreamAudioMute", jsonObject.toString());
         try {
             sendEventMap(this.getReactApplicationContext(), streamPreface + "onRemoteStreamAudioMute", EnxUtils.jsonToReact(jsonObject));
         } catch (JSONException e) {
@@ -715,7 +763,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onRemoteStreamAudioUnMute(JSONObject jsonObject) {
-        Log.e("onRemoteStrmAudioUnMute", jsonObject.toString());
         try {
             sendEventMap(this.getReactApplicationContext(), streamPreface + "onRemoteStreamAudioUnMute", EnxUtils.jsonToReact(jsonObject));
         } catch (JSONException e) {
@@ -725,7 +772,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onRemoteStreamVideoMute(JSONObject jsonObject) {
-        Log.e("onRemoteStrmVideoUnMute", jsonObject.toString());
         try {
             sendEventMap(this.getReactApplicationContext(), streamPreface + "onRemoteStreamVideoMute", EnxUtils.jsonToReact(jsonObject));
         } catch (JSONException e) {
@@ -735,7 +781,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onRemoteStreamVideoUnMute(JSONObject jsonObject) {
-        Log.e("onRemoteStrmVideoUnMute", jsonObject.toString());
         try {
             sendEventMap(this.getReactApplicationContext(), streamPreface + "onRemoteStreamVideoUnMute", EnxUtils.jsonToReact(jsonObject));
         } catch (JSONException e) {
@@ -745,42 +790,36 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onStartRecordingEvent(JSONObject jsonObject) {
-        Log.e("onStartRecordingEvent", jsonObject.toString());
         WritableMap streamInfo = EnxUtils.prepareJSResultMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), roomPreface + "onStartRecordingEvent", streamInfo);
     }
 
     @Override
     public void onRoomRecordingOn(JSONObject jsonObject) {
-        Log.e("onRoomRecordingOn", jsonObject.toString());
         WritableMap streamInfo = EnxUtils.prepareJSResultMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), roomPreface + "onRoomRecordingOn", streamInfo);
     }
 
     @Override
     public void onStopRecordingEvent(JSONObject jsonObject) {
-        Log.e("onStopRecordingEvent", jsonObject.toString());
         WritableMap streamInfo = EnxUtils.prepareJSResultMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), roomPreface + "onStopRecordingEvent", streamInfo);
     }
 
     @Override
     public void onRoomRecordingOff(JSONObject jsonObject) {
-        Log.e("onRoomRecordingOff", jsonObject.toString());
         WritableMap streamInfo = EnxUtils.prepareJSResultMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), roomPreface + "onRoomRecordingOff", streamInfo);
     }
 
     @Override
     public void onScreenSharedStarted(JSONObject jsonObject) {
-        Log.e("onScreenSharedStarted", jsonObject.toString());
         WritableMap streamInfo = EnxUtils.prepareJSShareStreamMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), roomPreface + "onScreenSharedStarted", streamInfo);
     }
 
     @Override
     public void onScreenSharedStopped(JSONObject jsonObject) {
-        Log.e("onScreenSharedStopped", jsonObject.toString());
         ConcurrentHashMap<String, EnxPlayerView> mPlayers = sharedState.getPlayerView();
         if (mPlayers.containsKey(jsonObject.optString("streamId"))) {
             mPlayers.remove(jsonObject.optString("streamId"));
@@ -795,42 +834,36 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onSetTalkerCount(JSONObject jsonObject) {
-        Log.e("onSetTalkerCount", jsonObject.toString());
         WritableMap streamInfo = EnxUtils.prepareJSTalkerMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), roomPreface + "onSetTalkerCount", streamInfo);
     }
 
     @Override
     public void onGetTalkerCount(JSONObject jsonObject) {
-        Log.e("onGetTalkerCount", jsonObject.toString());
         WritableMap streamInfo = EnxUtils.prepareJSTalkerMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), roomPreface + "onGetTalkerCount", streamInfo);
     }
 
     @Override
     public void onMaxTalkerCount(JSONObject jsonObject) {
-        Log.e("onMaxTalkerCount", jsonObject.toString());
         WritableMap streamInfo = EnxUtils.prepareJSTalkerMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), roomPreface + "onMaxTalkerCount", streamInfo);
     }
 
     @Override
     public void onLogUploaded(JSONObject jsonObject) {
-        Log.e("onLogUploaded", jsonObject.toString());
         WritableMap streamInfo = EnxUtils.prepareJSResultMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), roomPreface + "onLogUploaded", streamInfo);
     }
 
     @Override
     public void onFloorRequested(JSONObject jsonObject) {
-        Log.e("onFloorRequested", jsonObject.toString());
         WritableMap streamInfo = EnxUtils.prepareJSResultMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), roomPreface + "onFloorRequested", streamInfo);
     }
 
     @Override
     public void onFloorRequestReceived(JSONObject jsonObject) {
-        Log.e("onFloorRequestReceived", jsonObject.toString());
         WritableMap streamInfo = Arguments.createMap();
         streamInfo.putString("clientId", jsonObject.optString("clientId"));
         streamInfo.putString("name", jsonObject.optString("name"));
@@ -839,35 +872,30 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onProcessFloorRequested(JSONObject jsonObject) {
-        Log.e("onProcessFloorRequested", jsonObject.toString());
         WritableMap streamInfo = EnxUtils.prepareJSResultMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), roomPreface + "onProcessFloorRequested", streamInfo);
     }
 
     @Override
     public void onGrantedFloorRequest(JSONObject jsonObject) {
-        Log.e("onGrantedFloorRequest", jsonObject.toString());
         WritableMap streamInfo = EnxUtils.prepareJSCCResultMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), roomPreface + "onGrantedFloorRequest", streamInfo);
     }
 
     @Override
     public void onDeniedFloorRequest(JSONObject jsonObject) {
-        Log.e("onDeniedFloorRequest", jsonObject.toString());
         WritableMap streamInfo = EnxUtils.prepareJSCCResultMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), roomPreface + "onDeniedFloorRequest", streamInfo);
     }
 
     @Override
     public void onReleasedFloorRequest(JSONObject jsonObject) {
-        Log.e("onReleasedFloorRequest", jsonObject.toString());
         WritableMap streamInfo = EnxUtils.prepareJSCCResultMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), roomPreface + "onReleasedFloorRequest", streamInfo);
     }
 
     @Override
     public void onHardMutedAudio(JSONObject jsonObject) {
-        Log.e("onHardMutedAudio", jsonObject.toString());
         WritableMap streamInfo = Arguments.createMap();
         streamInfo.putString("result", jsonObject.optString("result"));
         sendEventMap(this.getReactApplicationContext(), streamPreface + "onHardMutedAudio", streamInfo);
@@ -875,7 +903,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onHardUnMutedAudio(JSONObject jsonObject) {
-        Log.e("onHardUnMutedAudio", jsonObject.toString());
         WritableMap streamInfo = Arguments.createMap();
         streamInfo.putString("result", jsonObject.optString("result"));
         sendEventMap(this.getReactApplicationContext(), streamPreface + "onHardUnMutedAudio", streamInfo);
@@ -883,21 +910,18 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onReceivedHardMuteAudio(JSONObject jsonObject) {
-        Log.e("onReceivedHardMuteAudio", jsonObject.toString());
         WritableMap streamInfo = EnxUtils.prepareJSCCResultMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), streamPreface + "onReceivedHardMuteAudio", streamInfo);
     }
 
     @Override
     public void onReceivedHardUnMuteAudio(JSONObject jsonObject) {
-        Log.e("onReceveHardUnMuteAudio", jsonObject.toString());
         WritableMap streamInfo = EnxUtils.prepareJSCCResultMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), streamPreface + "onReceivedHardUnMuteAudio", streamInfo);
     }
 
     @Override
     public void onHardMutedVideo(JSONObject jsonObject) {
-        Log.e("onHardMutedVideo", jsonObject.toString());
         WritableMap streamInfo = Arguments.createMap();
         streamInfo.putString("result", jsonObject.optString("result"));
         sendEventMap(this.getReactApplicationContext(), streamPreface + "onHardMutedVideo", streamInfo);
@@ -905,7 +929,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onHardUnMutedVideo(JSONObject jsonObject) {
-        Log.e("onHardUnMutedVideo", jsonObject.toString());
         WritableMap streamInfo = Arguments.createMap();
         streamInfo.putString("result", jsonObject.optString("result"));
         sendEventMap(this.getReactApplicationContext(), streamPreface + "onHardUnMutedVideo", streamInfo);
@@ -913,28 +936,24 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onReceivedHardMuteVideo(JSONObject jsonObject) {
-        Log.e("onReceivedHardMuteVideo", jsonObject.toString());
         WritableMap streamInfo = EnxUtils.prepareJSCCResultMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), streamPreface + "onReceivedHardMuteVideo", streamInfo);
     }
 
     @Override
     public void onReceivedHardUnMuteVideo(JSONObject jsonObject) {
-        Log.e("onReceivHardUnMuteVideo", jsonObject.toString());
         WritableMap streamInfo = EnxUtils.prepareJSCCResultMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), streamPreface + "onReceivedHardUnMuteVideo", streamInfo);
     }
 
     @Override
     public void onHardMuted(JSONObject jsonObject) {
-        Log.e("onHardMuted", jsonObject.toString());
         WritableMap streamInfo = EnxUtils.prepareJSResultMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), roomPreface + "onHardMuted", streamInfo);
     }
 
     @Override
     public void onReceivedHardMute(JSONObject jsonObject) {
-        Log.e("onReceivedHardMute", jsonObject.toString());
         WritableMap streamInfo = Arguments.createMap();
         streamInfo.putBoolean("status", jsonObject.optBoolean("status"));
         streamInfo.putString("msg", jsonObject.optString("msg"));
@@ -943,14 +962,12 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onHardUnMuted(JSONObject jsonObject) {
-        Log.e("onHardUnMuted", jsonObject.toString());
         WritableMap streamInfo = EnxUtils.prepareJSResultMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), roomPreface + "onHardUnMuted", streamInfo);
     }
 
     @Override
     public void onReceivedHardUnMute(JSONObject jsonObject) {
-        Log.e("onReceivedHardUnMute", jsonObject.toString());
         WritableMap streamInfo = Arguments.createMap();
         streamInfo.putBoolean("status", jsonObject.optBoolean("status"));
         streamInfo.putString("msg", jsonObject.optString("msg"));
@@ -959,7 +976,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onAcknowledgeStats(JSONObject jsonObject) {
-        Log.e("onAcknowledgeStats", jsonObject.toString());
         try {
             sendEventMap(this.getReactApplicationContext(), roomPreface + "onAcknowledgeStats", EnxUtils.jsonToReact(jsonObject));
         } catch (JSONException e) {
@@ -969,7 +985,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onReceivedStats(JSONObject jsonObject) {
-        Log.e("onReceivedStats", jsonObject.toString());
         try {
             sendEventMap(this.getReactApplicationContext(), roomPreface + "onReceivedStats", EnxUtils.jsonToReact(jsonObject));
         } catch (JSONException e) {
@@ -979,7 +994,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onPlayerStats(JSONObject jsonObject) {
-        Log.e("onPlayerStats", jsonObject.toString());
         try {
             sendEventMap(this.getReactApplicationContext(), streamPreface + "onPlayerStats", EnxUtils.jsonToReact(jsonObject));
         } catch (JSONException e) {
@@ -989,7 +1003,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onBandWidthUpdated(JSONArray jsonArray) {
-        Log.e("onBandWidthUpdated", jsonArray.toString());
         try {
             sendEventMapArray(this.getReactApplicationContext(), roomPreface + "onBandWidthUpdated", EnxUtils.convertJsonToArray(jsonArray));
         } catch (JSONException e) {
@@ -999,7 +1012,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onShareStreamEvent(JSONObject jsonObject) {
-        Log.e("onShareStreamEvent", jsonObject.toString());
         try {
             sendEventMap(this.getReactApplicationContext(), roomPreface + "onShareStreamEvent", EnxUtils.jsonToReact(jsonObject));
         } catch (JSONException e) {
@@ -1009,7 +1021,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onCanvasStreamEvent(JSONObject jsonObject) {
-        Log.e("onCanvasStreamEvent", jsonObject.toString());
         try {
             sendEventMap(this.getReactApplicationContext(), roomPreface + "onCanvasStreamEvent", EnxUtils.jsonToReact(jsonObject));
         } catch (JSONException e) {
@@ -1019,7 +1030,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onConnectionInterrupted(JSONObject jsonObject) {
-        Log.e("onConnectionInterrupted", jsonObject.toString());
         try {
             sendEventMap(this.getReactApplicationContext(), roomPreface + "onConnectionInterrupted", EnxUtils.jsonToReact(jsonObject));
         } catch (JSONException e) {
@@ -1029,7 +1039,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onConnectionLost(JSONObject jsonObject) {
-        Log.e("onConnectionLost", jsonObject.toString());
         try {
             sendEventMap(this.getReactApplicationContext(), roomPreface + "onConnectionLost", EnxUtils.jsonToReact(jsonObject));
         } catch (JSONException e) {
@@ -1039,13 +1048,11 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onReconnect(String s) {
-        Log.e("onReconnect", s);
         sendEventWithString(this.getReactApplicationContext(), roomPreface + "onReconnect", String.valueOf(s));
     }
 
     @Override
     public void onUserReconnectSuccess(EnxRoom enxRoom, JSONObject jsonObject) {
-        Log.e("onUserReconnectSuccess", jsonObject.toString());
         try {
             sendEventMap(this.getReactApplicationContext(), roomPreface + "onUserReconnectSuccess", EnxUtils.jsonToReact(jsonObject));
         } catch (JSONException e) {
@@ -1055,7 +1062,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void OnCapturedView(Bitmap bitmap) {
-        Log.e("OnCapturedView", bitmap.toString());
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
         byte[] byteArray = byteArrayOutputStream.toByteArray();
@@ -1064,7 +1070,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onAdvancedOptionsUpdate(JSONObject jsonObject) {
-        Log.e("onAdvancedOptionsUpdate", jsonObject.toString());
         try {
             sendEventMap(this.getReactApplicationContext(), roomPreface + "onAdvancedOptionsUpdate", EnxUtils.jsonToReact(jsonObject));
         } catch (JSONException e) {
@@ -1074,7 +1079,6 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onGetAdvancedOptions(JSONObject jsonObject) {
-        Log.e("onGetAdvancedOptions", jsonObject.toString());
         try {
             sendEventMap(this.getReactApplicationContext(), roomPreface + "onGetAdvancedOptions", EnxUtils.jsonToReact(jsonObject));
         } catch (JSONException e) {
@@ -1113,6 +1117,39 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
             jsonObject.put("timeout_interval", roomInfo.getString("timeout_interval"));
         } catch (JSONException e) {
             e.printStackTrace();
+        }
+        return jsonObject;
+    }
+
+    private JSONObject getAdvancedOptionsObject(ReadableMap advanceOptions) {
+        JSONObject jsonObject = new JSONObject();
+        JSONArray jsonArray = new JSONArray();
+        try {
+            if (advanceOptions.getBoolean("battery_updates")) {
+                jsonArray.put(getEventObject("battery_updates", true));
+            } else {
+                jsonArray.put(getEventObject("battery_updates", false));
+            }
+            if (advanceOptions.getBoolean("notify_video_resolution_change")) {
+                jsonArray.put(getEventObject("notify-video-resolution-change", true));
+            } else {
+                jsonArray.put(getEventObject("notify-video-resolution-change", false));
+            }
+            jsonObject.put("options", jsonArray);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonObject;
+
+    }
+
+    private JSONObject getEventObject(String eventName, boolean value) {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("id", eventName);
+            jsonObject.put("enable", value);
+        } catch (JSONException e) {
+
         }
         return jsonObject;
     }

@@ -37,11 +37,11 @@ class EnxStreamView : UIView {
         }
         else {
             let player = EnxPlayerView.init(frame: self.bounds)
-            self.addSubview(player!)
+            self.addSubview(player)
           //  player?.contentMode = UIView.ContentMode.scaleAspectFill
-            EnxRN.sharedState.players.updateValue(player!, forKey: streamId! as String)
+            EnxRN.sharedState.players.updateValue(player, forKey: streamId! as String)
             if(stream != nil){
-                stream?.attachRenderer(player!)
+                stream?.attachRenderer(player)
             }
         }
       }

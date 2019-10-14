@@ -83,15 +83,24 @@ const sanitizeRoomEvents = events => {
         shareStateEvent:
           "didShareStreamEvent" /* Event will notify if a significant change in share streams. */,
         canvasStateEvent:
-          "didCanvasStreamEvent", /* Event will notify if a significant change in canvas streams. */
-        reconnect: "didReconnect", /* Event will called on reconnect. */
-        userReconnect: "didUserReconnectSuccess", /* Event will called on reconnect success. */
-        connectionInterrupted: "didConnectionInterrupted", /* Event will notify if there is an interruption in connection. */
-        connectionLost: "didConnectionLost", /* Event will notify if the connection has lost. */ 
-        advancedOptionsUpdate: "didAdvanceOptionsUpdate", /* Event will notify advance options update. */ 
+          "didCanvasStreamEvent" /* Event will notify if a significant change in canvas streams. */,
+        reconnect: "didReconnect" /* Event will called on reconnect. */,
+        userReconnect:
+          "didUserReconnectSuccess" /* Event will called on reconnect success. */,
+        connectionInterrupted:
+          "didConnectionInterrupted" /* Event will notify if there is an interruption in connection. */,
+        connectionLost:
+          "didConnectionLost" /* Event will notify if the connection has lost. */,
+        advancedOptionsUpdate:
+          "didAdvanceOptionsUpdate" /* Event will notify advance options update. */,
         getAdvancedOptions: "didGetAdvanceOptions",
-        capturedView: "didCapturedView" /* Event will provide base64 string of captured screen shot image. */
-        
+        capturedView:
+          "didCapturedView" /* Event will provide base64 string of captured screen shot image. */,
+        receiveChatDataAtRoom:
+          "didReceiveChatDataAtRoom" /* Event will notify to reveive chat at room level. */,
+        acknowledgeSendData: "didAcknowledgSendData", // Event called on acknowledge send Data.
+        acknowledgeSwitchUserRole: "didSwitchUserRole", // Event called on acknowledge switch user role.
+        userRoleChanged: "didUserRoleChanged" // Event called on user role change.
       },
       android: {
         roomConnected: "onRoomConnected",
@@ -133,12 +142,16 @@ const sanitizeRoomEvents = events => {
         shareStateEvent: "onShareStreamEvent",
         canvasStateEvent: "onCanvasStreamEvent",
         reconnect: "onReconnect",
-        userReconnect: "onUserReconnectSuccess", 
+        userReconnect: "onUserReconnectSuccess",
         connectionInterrupted: "onConnectionInterrupted",
         connectionLost: "onConnectionLost",
-        capturedView : "OnCapturedView",
-        getAdvancedOptions :"onGetAdvancedOptions",
-        advancedOptionsUpdate :"onAdvancedOptionsUpdate"
+        capturedView: "OnCapturedView",
+        getAdvancedOptions: "onGetAdvancedOptions",
+        advancedOptionsUpdate: "onAdvancedOptionsUpdate",
+        receiveChatDataAtRoom: "onReceivedChatDataAtRoom",
+        acknowledgeSendData: "onAcknowledgedSendData",
+        acknowledgeSwitchUserRole: "onSwitchedUserRole",
+        userRoleChanged : "onUserRoleChanged"
       }
     };
     return reassignEvents("room", customEvents, events);
@@ -180,7 +193,6 @@ const sanitizeLocalInfoData = localInfo => {
   };
 };
 
-
 const sanitizeRoomData = roomInfo => {
   if (typeof roomInfo !== "object") {
     return {
@@ -193,8 +205,21 @@ const sanitizeRoomData = roomInfo => {
   return {
     allow_reconnect: validateBoolean(roomInfo.allow_reconnect),
     number_of_attempts: validateString(roomInfo.number_of_attempts),
-    timeout_interval:validateString(roomInfo.timeout_interval),
+    timeout_interval: validateString(roomInfo.timeout_interval),
     audio_only: validateBoolean(roomInfo.audio_only)
+  };
+};
+
+const sanitizeAdvanceOptions = advanceOptionsInfo => {
+  if (typeof advanceOptionsInfo !== "object") {
+    return {
+      battery_updates: false,
+      notify_video_resolution_change: false
+    };
+  }
+  return {
+    battery_updates: validateBoolean(advanceOptionsInfo.battery_updates),
+    notify_video_resolution_change: validateBoolean(advanceOptionsInfo.notify_video_resolution_change)
   };
 };
 
@@ -202,8 +227,13 @@ const validateString = value => (isString(value) ? value : "");
 
 const validateBoolean = value => (isBoolean(value) ? value : false);
 
-
 const sanitizeBooleanProperty = property =>
   property || property === undefined ? true : property;
 
-export { sanitizeRoomEvents, sanitizeLocalInfoData, sanitizeBooleanProperty,sanitizeRoomData };
+export {
+  sanitizeRoomEvents,
+  sanitizeLocalInfoData,
+  sanitizeBooleanProperty,
+  sanitizeRoomData,
+  sanitizeAdvanceOptions
+};
