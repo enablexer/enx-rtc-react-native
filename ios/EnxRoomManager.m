@@ -13,7 +13,7 @@
 @interface RCT_EXTERN_MODULE(EnxRoomManager, RCTEventEmitter)
 
 RCT_EXTERN_METHOD(initRoom)
-RCT_EXTERN_METHOD(joinRoom:(NSString *)token localInfo:(NSDictionary *)localInfo roomInfo:(NSDictionary *)roomInfo)
+RCT_EXTERN_METHOD(joinRoom:(NSString *)token localInfo:(NSDictionary *)localInfo roomInfo:(NSDictionary *)roomInfo advanceOptions:(NSArray *)advanceOptions) 
 RCT_EXTERN_METHOD(publish)
 RCT_EXTERN_METHOD(initStream:
                   (NSString*)streamId)

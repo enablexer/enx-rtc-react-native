@@ -12,5 +12,7 @@
 
 @interface EnxStream : RCTView
 @property (nonatomic, assign) NSString *streamId;
+@property (nonatomic, assign) NSString *isLocal;
+
 @end
 #endif /* EnxStream_h */

@@ -12,5 +12,6 @@
 
 @interface RCT_EXTERN_MODULE(EnxPlayerViewSwift, RCTViewManager)
 RCT_EXPORT_VIEW_PROPERTY(streamId, NSString)
+RCT_EXPORT_VIEW_PROPERTY(isLocal, NSString)
 @end
 

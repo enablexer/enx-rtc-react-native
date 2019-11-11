@@ -11,6 +11,7 @@ import EnxRTCiOS
 @objc(EnxStreamView)
 class EnxStreamView : UIView {
     @objc var streamId: NSString?
+    @objc var isLocal: NSString?
     override init(frame: CGRect) {
         super.init(frame: frame)
     }
@@ -36,12 +37,23 @@ class EnxStreamView : UIView {
             }
         }
         else {
-            let player = EnxPlayerView.init(frame: self.bounds)
-            self.addSubview(player)
-          //  player?.contentMode = UIView.ContentMode.scaleAspectFill
-            EnxRN.sharedState.players.updateValue(player, forKey: streamId! as String)
-            if(stream != nil){
-                stream?.attachRenderer(player)
+            if(isLocal == "local"){
+                let player = EnxPlayerView.init(localView: self.bounds)
+                self.addSubview(player)
+                //  player?.contentMode = UIView.ContentMode.scaleAspectFill
+                EnxRN.sharedState.players.updateValue(player, forKey: streamId! as String)
+                if(stream != nil){
+                    stream?.attachRenderer(player)
+                }
+            }
+            else {
+                let player =  EnxPlayerView.init(remoteView: self.bounds)
+                self.addSubview(player)
+                // player?.contentMode = UIView.ContentMode.scaleAspectFill
+                EnxRN.sharedState.players.updateValue(player, forKey: streamId! as String)
+                if(stream != nil){
+                    stream?.attachRenderer(player)
+                }
             }
         }
       }

@@ -6,7 +6,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.0'
+        classpath 'com.android.tools.build:gradle:3.5.1'
     }
 }
 
@@ -33,11 +33,11 @@ repositories {
 
 dependencies {
     implementation 'com.facebook.react:react-native:+'
-    implementation 'com.enxrtc:Enx-Rtc-Android:1.4.2'
-//    implementation 'org.webrtc:google-webrtc:1.0.28513'
-//    implementation('io.socket:socket.io-client:1.0.0') {
-//        exclude group: 'org.json', module: 'json'
-//    }
-//    implementation (name:'Enx-Rtc-Android-release_1.3.1', ext:'aar')
+//    implementation 'com.enxrtc:Enx-Rtc-Android:1.4.2'
+    implementation 'org.webrtc:google-webrtc:1.0.28513'
+    implementation('io.socket:socket.io-client:1.0.0') {
+        exclude group: 'org.json', module: 'json'
+    }
+    implementation (name:'Enx-Rtc-Android-release-1.5.0', ext:'aar')
 }
   

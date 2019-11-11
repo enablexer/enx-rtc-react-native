@@ -212,15 +212,15 @@ const sanitizeRoomData = roomInfo => {
 
 const sanitizeAdvanceOptions = advanceOptionsInfo => {
   if (typeof advanceOptionsInfo !== "object") {
-    return {
-      battery_updates: false,
-      notify_video_resolution_change: false
-    };
+    return [
+      {battery_updates: false},
+      {notify_video_resolution_change: false}
+           ];
   }
-  return {
-    battery_updates: validateBoolean(advanceOptionsInfo.battery_updates),
-    notify_video_resolution_change: validateBoolean(advanceOptionsInfo.notify_video_resolution_change)
-  };
+  return [
+    {battery_updates: validateBoolean(advanceOptionsInfo.battery_updates)},
+    {notify_video_resolution_change: validateBoolean(advanceOptionsInfo.notify_video_resolution_change)}
+         ];
 };
 
 const validateString = value => (isString(value) ? value : "");

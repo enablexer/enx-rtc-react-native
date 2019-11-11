@@ -1,6 +1,6 @@
 {
   "name": "enx-rtc-react-native",
-  "version": "1.4.2",
+  "version": "1.5.0",
   "description": "It is a react native component for Enablex users.",
   "main": "src/index.js",
   "scripts": {
@@ -50,7 +50,7 @@
     "react-native-axios": "^0.17.1",
     "react-native-easy-toast": "^1.2.0",
     "react-native-enhanced-popup-menu": "^0.6.1",
-    "react-native-navigation": "^3.2.0",
+    "react-native-navigation": "^3.3.0",
     "underscore": "^1.9.1"
   }
 }

@@ -9,7 +9,8 @@ class EnxPlayerView extends Component {
 }
 const viewPropTypes = View.propTypes;
 EnxPlayerView.propTypes = {
-   streamId: PropTypes.string.isRequired,  
+   streamId: PropTypes.string.isRequired, 
+   isLocal: PropTypes.string.isRequired, 
   ...viewPropTypes,
 };
 

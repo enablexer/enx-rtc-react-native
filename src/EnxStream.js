@@ -35,7 +35,7 @@ class EnxStream extends Component {
   render() {
     if (true) {
       const { streamId } = this.state;
-      return <EnxPlayerView streamId={streamId} {...this.props} />;
+      return <EnxPlayerView streamId={streamId} isLocal="local" {...this.props} />;
     }
     return <View />;
   }

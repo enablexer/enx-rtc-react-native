@@ -109,9 +109,13 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
     }
 
     @ReactMethod
-    public void joinRoom(String token, ReadableMap localStreamInfo, ReadableMap roomInfo, ReadableMap advanceOptions) {
+    public void joinRoom(String token, ReadableMap localStreamInfo, ReadableMap roomInfo, ReadableArray advanceOptions) {
         if (enxRtc != null) {
-            localStream = enxRtc.joinRoom(token, getLocalStreamJsonObject(localStreamInfo), getRoomInfoObject(roomInfo), getAdvancedOptionsObject(advanceOptions));
+            try {
+                localStream = enxRtc.joinRoom(token, getLocalStreamJsonObject(localStreamInfo), getRoomInfoObject(roomInfo), getAdvancedOptionsObject(EnxUtils.convertArrayToJson(advanceOptions)));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -565,9 +569,7 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
             enxRtc = null;
         }
 
-        WritableMap streamInfo = Arguments.createMap();
-        streamInfo.putInt("errorCode", jsonObject.optInt("errorCode"));
-        streamInfo.putString("msg", jsonObject.optString("msg"));
+        WritableMap streamInfo = EnxUtils.prepareJSUserMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), roomPreface + "onRoomError", streamInfo);
         sharedState = null;
     }
@@ -864,9 +866,7 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onFloorRequestReceived(JSONObject jsonObject) {
-        WritableMap streamInfo = Arguments.createMap();
-        streamInfo.putString("clientId", jsonObject.optString("clientId"));
-        streamInfo.putString("name", jsonObject.optString("name"));
+        WritableMap streamInfo = EnxUtils.prepareJSResultMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), roomPreface + "onFloorRequestReceived", streamInfo);
     }
 
@@ -896,15 +896,13 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onHardMutedAudio(JSONObject jsonObject) {
-        WritableMap streamInfo = Arguments.createMap();
-        streamInfo.putString("result", jsonObject.optString("result"));
+        WritableMap streamInfo = EnxUtils.prepareJSCCResultMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), streamPreface + "onHardMutedAudio", streamInfo);
     }
 
     @Override
     public void onHardUnMutedAudio(JSONObject jsonObject) {
-        WritableMap streamInfo = Arguments.createMap();
-        streamInfo.putString("result", jsonObject.optString("result"));
+        WritableMap streamInfo = EnxUtils.prepareJSCCResultMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), streamPreface + "onHardUnMutedAudio", streamInfo);
     }
 
@@ -922,15 +920,13 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onHardMutedVideo(JSONObject jsonObject) {
-        WritableMap streamInfo = Arguments.createMap();
-        streamInfo.putString("result", jsonObject.optString("result"));
+        WritableMap streamInfo = EnxUtils.prepareJSCCResultMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), streamPreface + "onHardMutedVideo", streamInfo);
     }
 
     @Override
     public void onHardUnMutedVideo(JSONObject jsonObject) {
-        WritableMap streamInfo = Arguments.createMap();
-        streamInfo.putString("result", jsonObject.optString("result"));
+        WritableMap streamInfo = EnxUtils.prepareJSCCResultMap(jsonObject);
         sendEventMap(this.getReactApplicationContext(), streamPreface + "onHardUnMutedVideo", streamInfo);
     }
 
@@ -954,10 +950,11 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onReceivedHardMute(JSONObject jsonObject) {
-        WritableMap streamInfo = Arguments.createMap();
-        streamInfo.putBoolean("status", jsonObject.optBoolean("status"));
-        streamInfo.putString("msg", jsonObject.optString("msg"));
-        sendEventMap(this.getReactApplicationContext(), roomPreface + "onReceivedHardMute", streamInfo);
+        try {
+            sendEventMap(this.getReactApplicationContext(), roomPreface + "onReceivedHardMute", EnxUtils.jsonToReact(jsonObject));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -968,10 +965,11 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
 
     @Override
     public void onReceivedHardUnMute(JSONObject jsonObject) {
-        WritableMap streamInfo = Arguments.createMap();
-        streamInfo.putBoolean("status", jsonObject.optBoolean("status"));
-        streamInfo.putString("msg", jsonObject.optString("msg"));
-        sendEventMap(this.getReactApplicationContext(), roomPreface + "onReceivedHardUnMute", streamInfo);
+        try {
+            sendEventMap(this.getReactApplicationContext(), roomPreface + "onReceivedHardUnMute", EnxUtils.jsonToReact(jsonObject));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -1121,21 +1119,12 @@ public class EnxRoomManager extends ReactContextBaseJavaModule implements EnxRoo
         return jsonObject;
     }
 
-    private JSONObject getAdvancedOptionsObject(ReadableMap advanceOptions) {
+    private JSONObject getAdvancedOptionsObject(JSONArray advanceOptions) {
+        Log.e("getAdvancedOptions",advanceOptions.toString());
+//        [{"battery_updates":false},{"notify_video_resolution_change":false}]
         JSONObject jsonObject = new JSONObject();
-        JSONArray jsonArray = new JSONArray();
         try {
-            if (advanceOptions.getBoolean("battery_updates")) {
-                jsonArray.put(getEventObject("battery_updates", true));
-            } else {
-                jsonArray.put(getEventObject("battery_updates", false));
-            }
-            if (advanceOptions.getBoolean("notify_video_resolution_change")) {
-                jsonArray.put(getEventObject("notify-video-resolution-change", true));
-            } else {
-                jsonArray.put(getEventObject("notify-video-resolution-change", false));
-            }
-            jsonObject.put("options", jsonArray);
+            jsonObject.put("options", advanceOptions);
         } catch (JSONException e) {
             e.printStackTrace();
         }

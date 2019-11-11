@@ -44,11 +44,10 @@ class EnxRoomManager: RCTEventEmitter {
       }
     }
     
-    @objc func joinRoom(_ token: String, localInfo: NSDictionary, roomInfo: NSDictionary){
+    @objc func joinRoom(_ token: String, localInfo: NSDictionary, roomInfo: NSDictionary, advanceOptions: NSArray){
         DispatchQueue.main.async {
             let localStreamInfo : NSDictionary = localInfo
-            
-            guard let localStreamObject =    self.objectJoin.joinRoom(token, delegate: self, publishStreamInfo: (localStreamInfo as! [AnyHashable : Any]), roomInfo: (roomInfo as! [AnyHashable : Any]), advanceOptions: nil) else{
+            guard let localStreamObject =    self.objectJoin.joinRoom(token, delegate: self, publishStreamInfo: (localStreamInfo as! [AnyHashable : Any]), roomInfo: (roomInfo as! [AnyHashable : Any]), advanceOptions: advanceOptions as? [Any]) else{
                 return
             }
             self.localStream = localStreamObject
