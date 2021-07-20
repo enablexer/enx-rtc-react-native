@@ -38,7 +38,7 @@
     "eslint-config-callstack-io": "^0.4.1",
     "flow-bin": "^0.53.0",
     "react": "^16.3.0-alpha.1",
-    "react-native": "^0.60.4"
+    "react-native": "^0.62.3"
   },
   "dependencies": {
     "axios": "^0.19.0",
