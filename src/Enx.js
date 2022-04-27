@@ -36,7 +36,8 @@ const setNativeEvents = (events) => {
   const eventNames = Object.keys(events);
   Enx.setNativeEvents(eventNames); 
   each(events, (eventHandler, eventType) => {
-    const allEvents = nativeEvents.listeners();
+    //const allEvents = nativeEvents.listeners();
+    const allEvents = []
     if (!allEvents.includes(eventType)) {
       nativeEvents.addListener(eventType, eventHandler);
     }
