@@ -34,7 +34,7 @@
   "devDependencies": {
     "@babel/plugin-external-helpers": "^7.2.0",
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.2.0",
-    "eslint": "^4.6.1",
+    "eslint": "^8.14.0",
     "eslint-config-callstack-io": "^0.4.1",
     "flow-bin": "^0.53.0",
     "react": "17.0.2",
@@ -43,10 +43,10 @@
   "dependencies": {
     "axios": "^0.27.1",
     "babel-preset-react-native": "5.0.2",
-    "nodemon": "^1.18.10",
+    "nodemon": "^2.0.15",
     "npm-install-peers": "^1.2.1",
     "prop-types": "^15.6.0",
-    "react-devtools": "^3.6.1",
+    "react-devtools": "^4.24.4",
     "react-native-axios": "^0.17.1",
     "react-native-easy-toast": "^1.2.0",
     "react-native-enhanced-popup-menu": "^0.6.1",
